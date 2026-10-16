@@ -1,0 +1,98 @@
+{
+  "Baseline (TF-IDF + Naive Bayes)": {
+    "threshold": 0.5,
+    "accuracy": 0.9896640826873385,
+    "precision": 0.968421052631579,
+    "recall": 0.9484536082474226,
+    "f1": 0.9583333333333334,
+    "roc_auc": 0.9979594633693218,
+    "pr_auc": 0.989397448009245,
+    "brier_score": 0.009058877361944323,
+    "confusion_matrix": {
+      "TN": 674,
+      "FP": 3,
+      "FN": 5,
+      "TP": 92
+    }
+  },
+  "Original Rebuilt (AvgPool)": {
+    "threshold": 0.5,
+    "accuracy": 0.12532299741602068,
+    "precision": 0.12532299741602068,
+    "recall": 1.0,
+    "f1": 0.2227324913892078,
+    "roc_auc": 0.5,
+    "pr_auc": 0.12532299741602068,
+    "brier_score": 0.25014129281044006,
+    "confusion_matrix": {
+      "TN": 0,
+      "FP": 677,
+      "FN": 0,
+      "TP": 97
+    }
+  },
+  "1D CNN (N-Gram Filters)": {
+    "threshold": 0.5,
+    "accuracy": 0.9909560723514211,
+    "precision": 0.9411764705882353,
+    "recall": 0.9896907216494846,
+    "f1": 0.964824120603015,
+    "roc_auc": 0.9993908845878573,
+    "pr_auc": 0.995781159735565,
+    "brier_score": 0.009004930965602398,
+    "confusion_matrix": {
+      "TN": 671,
+      "FP": 6,
+      "FN": 1,
+      "TP": 96
+    }
+  },
+  "Bidirectional LSTM": {
+    "threshold": 0.5,
+    "accuracy": 0.9780361757105943,
+    "precision": 0.8508771929824561,
+    "recall": 1.0,
+    "f1": 0.919431279620853,
+    "roc_auc": 0.9986294903226789,
+    "pr_auc": 0.9902694272205531,
+    "brier_score": 0.01898820884525776,
+    "confusion_matrix": {
+      "TN": 660,
+      "FP": 17,
+      "FN": 0,
+      "TP": 97
+    }
+  },
+  "Transformer-Lite (Self-Attention)": {
+    "threshold": 0.5,
+    "accuracy": 0.9857881136950905,
+    "precision": 0.9056603773584906,
+    "recall": 0.9896907216494846,
+    "f1": 0.9458128078817734,
+    "roc_auc": 0.9990558711111788,
+    "pr_auc": 0.9938944633891341,
+    "brier_score": 0.011224430054426193,
+    "confusion_matrix": {
+      "TN": 667,
+      "FP": 10,
+      "FN": 1,
+      "TP": 96
+    }
+  },
+  "Bidirectional LSTM (Tuned Threshold)": {
+    "threshold": 0.95,
+    "accuracy": 0.9883720930232558,
+    "precision": 0.9230769230769231,
+    "recall": 0.9896907216494846,
+    "f1": 0.9552238805970149,
+    "roc_auc": 0.9986294903226789,
+    "pr_auc": 0.9902694272205531,
+    "brier_score": 0.01898820884525776,
+    "confusion_matrix": {
+      "TN": 669,
+      "FP": 8,
+      "FN": 1,
+      "TP": 96
+    }
+  }
+}

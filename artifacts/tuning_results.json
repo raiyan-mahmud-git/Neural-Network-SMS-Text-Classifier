@@ -1,0 +1,102 @@
+{
+  "best_trial": {
+    "trial_id": 1,
+    "params": {
+      "vocab_size": 8000,
+      "embed_dim": 64,
+      "lstm_units": 32,
+      "dropout": 0.2,
+      "lr": 0.002
+    },
+    "val_pr_auc": 0.0,
+    "val_loss": 0.07410065084695816,
+    "val_accuracy": 0.0,
+    "stopped_epoch": 5
+  },
+  "all_trials": [
+    {
+      "trial_id": 1,
+      "params": {
+        "vocab_size": 8000,
+        "embed_dim": 64,
+        "lstm_units": 32,
+        "dropout": 0.2,
+        "lr": 0.002
+      },
+      "val_pr_auc": 0.0,
+      "val_loss": 0.07410065084695816,
+      "val_accuracy": 0.0,
+      "stopped_epoch": 5
+    },
+    {
+      "trial_id": 2,
+      "params": {
+        "vocab_size": 5000,
+        "embed_dim": 64,
+        "lstm_units": 32,
+        "dropout": 0.4,
+        "lr": 0.002
+      },
+      "val_pr_auc": 0.0,
+      "val_loss": 0.11860136687755585,
+      "val_accuracy": 0.0,
+      "stopped_epoch": 4
+    },
+    {
+      "trial_id": 3,
+      "params": {
+        "vocab_size": 8000,
+        "embed_dim": 64,
+        "lstm_units": 16,
+        "dropout": 0.2,
+        "lr": 0.001
+      },
+      "val_pr_auc": 0.0,
+      "val_loss": 0.09293529391288757,
+      "val_accuracy": 0.0,
+      "stopped_epoch": 4
+    },
+    {
+      "trial_id": 4,
+      "params": {
+        "vocab_size": 8000,
+        "embed_dim": 32,
+        "lstm_units": 16,
+        "dropout": 0.2,
+        "lr": 0.002
+      },
+      "val_pr_auc": 0.0,
+      "val_loss": 0.11777526885271072,
+      "val_accuracy": 0.0,
+      "stopped_epoch": 4
+    },
+    {
+      "trial_id": 5,
+      "params": {
+        "vocab_size": 5000,
+        "embed_dim": 64,
+        "lstm_units": 16,
+        "dropout": 0.2,
+        "lr": 0.001
+      },
+      "val_pr_auc": 0.0,
+      "val_loss": 0.09846717864274979,
+      "val_accuracy": 0.0,
+      "stopped_epoch": 5
+    },
+    {
+      "trial_id": 6,
+      "params": {
+        "vocab_size": 5000,
+        "embed_dim": 64,
+        "lstm_units": 16,
+        "dropout": 0.2,
+        "lr": 0.002
+      },
+      "val_pr_auc": 0.0,
+      "val_loss": 0.08290755748748779,
+      "val_accuracy": 0.0,
+      "stopped_epoch": 4
+    }
+  ]
+}

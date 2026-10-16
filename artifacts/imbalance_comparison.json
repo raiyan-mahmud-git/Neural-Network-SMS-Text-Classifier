@@ -1,0 +1,35 @@
+[
+  {
+    "Strategy": "no_handling",
+    "Accuracy": 98.32,
+    "Precision": 92.0,
+    "Recall": 94.85,
+    "F1-Score": 0.934,
+    "PR-AUC": 0.9878,
+    "ROC-AUC": 0.9979,
+    "False Positives (FP)": 8,
+    "False Negatives (FN)": 5
+  },
+  {
+    "Strategy": "class_weight",
+    "Accuracy": 99.1,
+    "Precision": 94.12,
+    "Recall": 98.97,
+    "F1-Score": 0.9648,
+    "PR-AUC": 0.9958,
+    "ROC-AUC": 0.9994,
+    "False Positives (FP)": 6,
+    "False Negatives (FN)": 1
+  },
+  {
+    "Strategy": "oversampling",
+    "Accuracy": 98.84,
+    "Precision": 94.0,
+    "Recall": 96.91,
+    "F1-Score": 0.9543,
+    "PR-AUC": 0.9933,
+    "ROC-AUC": 0.9989,
+    "False Positives (FP)": 6,
+    "False Negatives (FN)": 3
+  }
+]

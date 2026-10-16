@@ -1,0 +1,51 @@
+{
+  "false_positives": [
+    {
+      "text": "please protect yourself from e-threats. sib never asks for sensitive information like passwords,atm/sms pin thru email. never share your password with anybody.",
+      "true_label": "ham",
+      "predicted_prob": 0.9999260306358337
+    },
+    {
+      "text": "enjoy the showers of possessiveness poured on u by ur loved ones, bcoz in this world of lies, it is a golden gift to be loved truly..",
+      "true_label": "ham",
+      "predicted_prob": 0.9999244213104248
+    },
+    {
+      "text": "urgh, coach hot, smells of chip fat! thanks again, especially for the duvet (not a predictive text word).",
+      "true_label": "ham",
+      "predicted_prob": 0.9995384216308594
+    },
+    {
+      "text": "hey...great deal...farm tour 9am to 5pm <MONEY> /pax, <MONEY> deposit by 16 may",
+      "true_label": "ham",
+      "predicted_prob": 0.9992862939834595
+    },
+    {
+      "text": "yun ah.the ubi one say if \u00fc wan call by tomorrow.call <PHONE> look for irene.ere only got bus8,22,65,61,66,382. ubi cres,ubi tech park.6ph for 1st 5wkg days.\u00e8n",
+      "true_label": "ham",
+      "predicted_prob": 0.9992668628692627
+    },
+    {
+      "text": "oh! shit, i thought that was your trip! loooooool ... that just makes so much more sense now ... *grins* and the sofa reference was ... the sleep on a couch link you sent me ... wasn't that how you went on your trip ? oh ... and didn't your babe go with you for that celebration with your rents?",
+      "true_label": "ham",
+      "predicted_prob": 0.9945726990699768
+    },
+    {
+      "text": "abeg, make profit. but its a start. are you using it to get sponsors for the next event?",
+      "true_label": "ham",
+      "predicted_prob": 0.9835062623023987
+    },
+    {
+      "text": "waqt se pehle or naseeb se zyada kisi ko kuch nahi milta,zindgi wo nahi he jo hum sochte hai zindgi wo hai jo ham jeetey hai..........",
+      "true_label": "ham",
+      "predicted_prob": 0.954546332359314
+    }
+  ],
+  "false_negatives": [
+    {
+      "text": "dear voucher holder 2 claim your 1st class airport lounge passes when using your holiday voucher call <PHONE> . when booking quote 1st class x 2",
+      "true_label": "spam",
+      "predicted_prob": 0.9098297357559204
+    }
+  ]
+}
