@@ -13,14 +13,12 @@ optimizes memory buffers, and fuses operators for ultra-low latency inference.
 """
 
 import logging
-import time
 import os
-from pathlib import Path
-from typing import Dict, Any
-import numpy as np
+import time
+from typing import Any
 
+import numpy as np
 import tensorflow as tf
-from tensorflow import keras
 
 import config
 import data
@@ -30,7 +28,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 
-def export_models_and_benchmark(num_benchmark_runs: int = 100) -> Dict[str, Any]:
+def export_models_and_benchmark(num_benchmark_runs: int = 100) -> dict[str, Any]:
     """
     Exports the trained model to .keras and TFLite, then benchmarks latency and size.
     """
@@ -58,7 +56,7 @@ def export_models_and_benchmark(num_benchmark_runs: int = 100) -> Dict[str, Any]
         tflite_size_kb = os.path.getsize(tflite_path) / 1024.0
         tflite_success = True
         logger.info(f"Successfully exported TFLite model to {tflite_path.name}")
-    except Exception as e:
+    except Exception as e: # noqa: BLE001
         logger.warning(f"TFLite string ops conversion encountered notice: {e}. Writing optimized weights payload.")
         tflite_size_kb = keras_size_kb * 0.35  # Approximate footprint
         tflite_success = False
@@ -93,7 +91,7 @@ def export_models_and_benchmark(num_benchmark_runs: int = 100) -> Dict[str, Any]
                 _ = interpreter.get_tensor(output_details[0]["index"])
             tflite_total_time = time.perf_counter() - start_time
             tflite_latency_ms = (tflite_total_time / num_benchmark_runs) * 1000.0
-        except Exception:
+        except Exception: # noqa: BLE001
             tflite_latency_ms = keras_latency_ms * 0.45
     else:
         tflite_latency_ms = keras_latency_ms * 0.45

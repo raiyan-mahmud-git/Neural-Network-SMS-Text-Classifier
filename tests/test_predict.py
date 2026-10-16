@@ -10,12 +10,12 @@ Tests:
 6. Preprocessing regex token normalizations (<URL>, <PHONE>, <MONEY>)
 """
 
-import pytest
 import numpy as np
-from predict import predict_message
-from data import clean_text
-import config
+import pytest
 
+import config
+from data import clean_text
+from predict import predict_message
 
 # ---------------------------------------------------------------------------
 # 1. FreeCodeCamp Official Benchmark Verification

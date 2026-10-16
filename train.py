@@ -9,13 +9,13 @@ standalone self-contained artifacts.
 """
 
 import argparse
-import logging
 import json
+import logging
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Any
+
 import matplotlib.pyplot as plt
 import numpy as np
-
 import tensorflow as tf
 from tensorflow import keras
 
@@ -39,7 +39,7 @@ def plot_learning_curves(history: keras.callbacks.History, model_name: str, save
     """
     epochs_range = range(1, len(history.history["loss"]) + 1)
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    _fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     # Loss subplot
     axes[0].plot(epochs_range, history.history["loss"], "b-o", label="Training Loss")
@@ -79,7 +79,7 @@ def train_single_neural_model(
     epochs: int = config.DEFAULT_EPOCHS,
     batch_size: int = config.BATCH_SIZE,
     imbalance_strategy: str = "class_weight"
-) -> Tuple[keras.Model, Dict[str, Any]]:
+) -> tuple[keras.Model, dict[str, Any]]:
     """
     Trains a selected neural model with EarlyStopping, ReduceLROnPlateau, and ModelCheckpoint.
 
@@ -154,10 +154,17 @@ def train_baseline_pipeline(
     X_val: np.ndarray,
     y_val: np.ndarray,
     model_type: str = "nb"
-) -> Tuple[Any, Dict[str, float]]:
+) -> tuple[Any, dict[str, float]]:
     """Trains classical TF-IDF baseline and calculates validation scores."""
-    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, average_precision_score
     import joblib
+    from sklearn.metrics import (
+        accuracy_score,
+        average_precision_score,
+        f1_score,
+        precision_score,
+        recall_score,
+        roc_auc_score,
+    )
 
     logger.info(f"--- Training Classical Baseline: TF-IDF + {model_type.upper()} ---")
     pipeline = models.build_baseline_tfidf(model_type=model_type)
@@ -198,7 +205,7 @@ def main() -> None:
     config.set_seed(args.seed)
 
     # Prepare leak-free stratified 3-way split
-    X_train, y_train, X_val, y_val, X_test, y_test = data.get_stratified_3way_splits(seed=args.seed)
+    X_train, y_train, X_val, y_val, _X_test, _y_test = data.get_stratified_3way_splits(seed=args.seed)
 
     # Create & adapt TextVectorization layer on training set ONLY
     logger.info("Adapting TextVectorization on training corpus...")
@@ -213,7 +220,7 @@ def main() -> None:
             _, val_metrics = train_baseline_pipeline(X_train, y_train, X_val, y_val, model_type="nb")
             results["baseline_nb"] = val_metrics
         else:
-            trained_model, val_metrics = train_single_neural_model(
+            _trained_model, val_metrics = train_single_neural_model(
                 model_name=name,
                 X_train=X_train,
                 y_train=y_train,

@@ -8,13 +8,13 @@ or gRPC APIs with strict request/response data contracts, schema validation,
 and health check endpoints for Kubernetes/container orchestration.
 """
 
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from typing import Dict, Any
-import uvicorn
 
-from predict import predict_message, get_inference_model
 import config
+from predict import get_inference_model, predict_message
 
 app = FastAPI(
     title="SMS Spam Detection Service",
@@ -45,7 +45,7 @@ def startup_event():
 
 
 @app.get("/health", tags=["Monitoring"])
-def health_check() -> Dict[str, str]:
+def health_check() -> dict[str, str]:
     """Liveness & readiness probe for container orchestrators."""
     return {"status": "healthy", "service": "sms-spam-classifier"}
 
@@ -62,8 +62,8 @@ def predict_sms(request: SMSRequest) -> SMSResponse:
             is_spam=(label == "spam"),
             threshold_applied=request.threshold
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
+    except Exception as e: # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"Inference error: {e!s}")
 
 
 if __name__ == "__main__":

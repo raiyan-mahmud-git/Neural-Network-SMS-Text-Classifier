@@ -7,24 +7,26 @@ A senior ML engineer must inspect Precision-Recall trade-offs, calibrate probabi
 audit false positives/negatives, verify cross-validation stability, and explain individual predictions.
 """
 
-import json
 import logging
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Any
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    roc_auc_score, average_precision_score, confusion_matrix,
-    brier_score_loss
-)
 from sklearn.calibration import calibration_curve
+from sklearn.metrics import (
+    accuracy_score,
+    average_precision_score,
+    brier_score_loss,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
 from sklearn.model_selection import StratifiedKFold
-
-import tensorflow as tf
 from tensorflow import keras
-import joblib
 
 import config
 import data
@@ -34,7 +36,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 
-def compute_all_metrics(y_true: np.ndarray, y_prob: np.ndarray, threshold: float = config.DEFAULT_THRESHOLD) -> Dict[str, Any]:
+def compute_all_metrics(y_true: np.ndarray, y_prob: np.ndarray, threshold: float = config.DEFAULT_THRESHOLD) -> dict[str, Any]:
     """
     Computes a comprehensive suite of binary classification metrics.
 
@@ -73,7 +75,7 @@ def tune_decision_threshold(
     y_val: np.ndarray,
     val_probs: np.ndarray,
     fp_cost_weight: float = 3.0
-) -> Tuple[float, pd.DataFrame]:
+) -> tuple[float, pd.DataFrame]:
     """
     Sweeps decision thresholds [0.05, 0.95] to find the optimal operating point.
 
@@ -95,7 +97,7 @@ def tune_decision_threshold(
         rec = recall_score(y_val, preds, zero_division=0)
         f1 = f1_score(y_val, preds, zero_division=0)
         cm = confusion_matrix(y_val, preds)
-        tn, fp, fn, tp = cm.ravel()
+        tn, fp, fn, _tp = cm.ravel()
 
         # Custom cost: prioritize F1 while heavily penalizing FP
         # score = F1 - (fp_cost_weight * (fp / len(y_val)))
@@ -143,7 +145,7 @@ def plot_learning_curves(history: keras.callbacks.History, model_name: str, save
     Plots training and validation loss and PR-AUC curves to diagnose overfitting/underfitting.
     """
     epochs_range = range(1, len(history.history["loss"]) + 1)
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    _fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     # Loss subplot
     axes[0].plot(epochs_range, history.history["loss"], "b-o", label="Training Loss")
@@ -173,7 +175,7 @@ def plot_learning_curves(history: keras.callbacks.History, model_name: str, save
     logger.info(f"Saved learning curves to {save_path}")
 
 
-def plot_calibration_curves(models_dict: Dict[str, Tuple[np.ndarray, np.ndarray]], save_path: Path) -> None:
+def plot_calibration_curves(models_dict: dict[str, tuple[np.ndarray, np.ndarray]], save_path: Path) -> None:
     """
     Generates a Reliability Diagram (Calibration Curve) for evaluated models.
 
@@ -207,7 +209,7 @@ def perform_error_analysis(
     y_prob: np.ndarray,
     threshold: float = config.DEFAULT_THRESHOLD,
     top_n: int = 10
-) -> Dict[str, List[Dict[str, Any]]]:
+) -> dict[str, list[dict[str, Any]]]:
     """
     Identifies and analyzes top False Positives and False Negatives.
 
@@ -243,7 +245,7 @@ def perform_error_analysis(
     return {"false_positives": false_positives, "false_negatives": false_negatives}
 
 
-def explain_prediction_occlusion(text: str, predict_fn, top_k: int = 5) -> List[Tuple[str, float]]:
+def explain_prediction_occlusion(text: str, predict_fn, top_k: int = 5) -> list[tuple[str, float]]:
     """
     Word-level occlusion attribution:
     Measures the drop in spam probability when each word is removed.
@@ -280,7 +282,7 @@ def run_stratified_cross_validation(
     model_type: str = "baseline",
     n_splits: int = 5,
     seed: int = config.SEED
-) -> Dict[str, Tuple[float, float]]:
+) -> dict[str, tuple[float, float]]:
     """
     Performs 5-fold stratified cross-validation for a model.
 

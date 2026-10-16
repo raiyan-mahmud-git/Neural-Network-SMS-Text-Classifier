@@ -10,8 +10,8 @@ Saves:
 
 import logging
 from collections import Counter
+
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 import config
@@ -51,7 +51,7 @@ def generate_eda_artifacts():
     df["char_len"] = df["message"].apply(len)
     df["word_cnt"] = df["message"].apply(lambda s: len(str(s).split()))
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    _fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     axes[0].hist(df[df["label"] == "ham"]["char_len"], bins=40, alpha=0.6, color="#2ecc71", label="Ham (Normal)", density=True)
     axes[0].hist(df[df["label"] == "spam"]["char_len"], bins=40, alpha=0.6, color="#e74c3c", label="Spam", density=True)
@@ -79,14 +79,14 @@ def generate_eda_artifacts():
     df["cleaned"] = df["message"].apply(data.clean_text)
 
     # Filter generic stopwords
-    stopwords = set(["to", "you", "a", "i", "the", "and", "is", "in", "for", "of", "my", "it", "on", "me", "your", "that", "have", "at", "are", "do", "from", "with", "be"])
+    stopwords = {"to", "you", "a", "i", "the", "and", "is", "in", "for", "of", "my", "it", "on", "me", "your", "that", "have", "at", "are", "do", "from", "with", "be"}
     spam_tokens = [w for w in " ".join(df[df["label"] == "spam"]["cleaned"]).split() if w not in stopwords and len(w) > 1]
     ham_tokens = [w for w in " ".join(df[df["label"] == "ham"]["cleaned"]).split() if w not in stopwords and len(w) > 1]
 
     top_spam = Counter(spam_tokens).most_common(12)
     top_ham = Counter(ham_tokens).most_common(12)
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    _fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     s_words, s_counts = zip(*top_spam)
     axes[0].barh(s_words[::-1], s_counts[::-1], color="#e74c3c")

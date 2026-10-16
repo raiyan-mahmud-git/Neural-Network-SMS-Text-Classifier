@@ -10,11 +10,8 @@ Provides:
 import argparse
 import logging
 import sys
-from pathlib import Path
-from typing import List, Union, Tuple
-import numpy as np
 
-import tensorflow as tf
+import numpy as np
 from tensorflow import keras
 
 import config
@@ -58,7 +55,7 @@ def get_inference_model() -> keras.Model:
                 _CACHED_MODEL = keras.models.load_model(model_file, custom_objects=custom_objects)
                 logger.info(f"Loaded trained model from {model_file.name}")
                 return _CACHED_MODEL
-            except Exception as e:
+            except Exception as e: # noqa: BLE001
                 logger.warning(f"Could not load {model_file}: {e}")
 
     # If no model found on disk, train a lightweight model on the fly
@@ -73,7 +70,7 @@ def get_inference_model() -> keras.Model:
     return _CACHED_MODEL
 
 
-def predict_message(pred_text: str, threshold: float = config.DEFAULT_THRESHOLD) -> List[Union[float, str]]:
+def predict_message(pred_text: str, threshold: float = config.DEFAULT_THRESHOLD) -> list[float | str]:
     """
     Predicts whether a message is spam or ham.
 

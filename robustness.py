@@ -16,11 +16,7 @@ and motivates character-level normalization or adversarial augmentation.
 
 import logging
 import re
-from typing import Dict, List, Tuple
-import numpy as np
 
-import config
-import data
 from predict import predict_message
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -68,7 +64,7 @@ def deobfuscate_leetspeak(text: str) -> str:
     return reconstructed
 
 
-def run_robustness_benchmark() -> Dict[str, List[Dict[str, any]]]:
+def run_robustness_benchmark() -> dict[str, list[dict[str, any]]]:
     """Evaluates the model on adversarial perturbations and OOD samples."""
     logger.info("--- Evaluating Adversarial Robustness ---")
 

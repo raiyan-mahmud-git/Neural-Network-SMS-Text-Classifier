@@ -8,11 +8,11 @@ A clean web interface with explainability features transforms a black-box model
 into an interpretable, verifiable product that users and reviewers can trust.
 """
 
-import streamlit as st
+import json
+
 import numpy as np
 import pandas as pd
-import json
-from pathlib import Path
+import streamlit as st
 
 # Streamlit Page Config
 st.set_page_config(
@@ -23,8 +23,8 @@ st.set_page_config(
 
 import config
 import data
-from predict import predict_message, get_inference_model
 from evaluate import explain_prediction_occlusion
+from predict import get_inference_model, predict_message
 
 # Title & Mentor Framing
 st.title("🛡️ Production SMS Spam Classifier")

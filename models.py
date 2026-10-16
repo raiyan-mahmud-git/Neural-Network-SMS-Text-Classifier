@@ -14,14 +14,12 @@ recurrent, and attention-based models reveals the trade-offs between parameter c
 training speed, inductive bias, and classification accuracy.
 """
 
-from typing import Tuple, Optional
 import numpy as np
-from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.linear_model import LogisticRegression
-
 import tensorflow as tf
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
 from tensorflow import keras
 from tensorflow.keras import layers
 

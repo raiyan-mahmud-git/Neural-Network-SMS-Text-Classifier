@@ -15,11 +15,8 @@ in precision.
 
 import json
 import logging
-from typing import Dict, Any
-import numpy as np
-import pandas as pd
 
-import tensorflow as tf
+import pandas as pd
 from tensorflow import keras
 
 import config

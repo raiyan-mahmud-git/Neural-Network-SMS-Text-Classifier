@@ -9,8 +9,7 @@ and disciplined split hygiene (train / validation / test) to prevent over-optimi
 
 import logging
 import re
-import urllib.request
-from typing import Dict, Tuple, Optional
+
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -50,7 +49,7 @@ def download_dataset(url: str, destination_path) -> None:
         logger.debug(f"File {destination_path.name} already exists. Skipping download.")
 
 
-def ensure_datasets_present() -> Tuple[config.Path, config.Path]:
+def ensure_datasets_present() -> tuple[config.Path, config.Path]:
     """Ensures both train-data.tsv and valid-data.tsv are downloaded."""
     download_dataset(config.TRAIN_DATA_URL, config.TRAIN_FILE)
     download_dataset(config.VALID_DATA_URL, config.VALID_FILE)
@@ -95,7 +94,7 @@ def clean_text(text: str) -> str:
     return text
 
 
-def load_raw_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
+def load_raw_data() -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Loads raw freeCodeCamp train and validation dataframes.
     TSV format has two columns: [label, message]
@@ -111,7 +110,7 @@ def load_raw_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
     return train_df, valid_df
 
 
-def inspect_leakage_and_duplicates(train_df: pd.DataFrame, valid_df: pd.DataFrame) -> Dict[str, int]:
+def inspect_leakage_and_duplicates(train_df: pd.DataFrame, valid_df: pd.DataFrame) -> dict[str, int]:
     """
     Analyzes duplicate messages within and across dataset splits.
 
@@ -148,7 +147,7 @@ def get_stratified_3way_splits(
     test_size: float = 0.15,
     clean: bool = True,
     seed: int = config.SEED
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Combines all available data, drops exact duplicates, and generates a leak-free,
     stratified 3-way split: (X_train, y_train), (X_val, y_val), (X_test, y_test).
@@ -190,7 +189,7 @@ def get_stratified_3way_splits(
     return X_train, y_train, X_val, y_val, X_test, y_test
 
 
-def get_fcc_raw_splits(clean: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def get_fcc_raw_splits(clean: bool = True) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Returns train and valid data adhering strictly to the freeCodeCamp split structure.
     Used for direct backward-compatibility verification.
@@ -207,7 +206,7 @@ def get_fcc_raw_splits(clean: bool = True) -> Tuple[np.ndarray, np.ndarray, np.n
     return train_texts, np.array(train_df["target"].tolist(), dtype=int), valid_texts, np.array(valid_df["target"].tolist(), dtype=int)
 
 
-def get_class_weights(y: np.ndarray) -> Dict[int, float]:
+def get_class_weights(y: np.ndarray) -> dict[int, float]:
     """
     Calculates balanced class weights: n_samples / (n_classes * np.bincount(y)).
 
@@ -220,7 +219,7 @@ def get_class_weights(y: np.ndarray) -> Dict[int, float]:
     return {cls: float(weight) for cls, weight in zip(np.unique(y), weights)}
 
 
-def oversample_minority_class(X: np.ndarray, y: np.ndarray, seed: int = config.SEED) -> Tuple[np.ndarray, np.ndarray]:
+def oversample_minority_class(X: np.ndarray, y: np.ndarray, seed: int = config.SEED) -> tuple[np.ndarray, np.ndarray]:
     """
     Performs random oversampling on the minority class (spam) to balance the training distribution.
 

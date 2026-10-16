@@ -20,19 +20,16 @@ Outputs:
 
 import json
 import logging
-from pathlib import Path
-from typing import Dict, Any, Tuple
+
+import joblib
 import numpy as np
 import pandas as pd
-import joblib
-
-import tensorflow as tf
 from tensorflow import keras
 
 import config
 import data
-import models
 import evaluate
+import models
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -63,7 +60,7 @@ def run_full_benchmark():
 
     joblib.dump(baseline_pipe, config.MODELS_DIR / "baseline_nb.joblib")
 
-    val_probs_base = baseline_pipe.predict_proba(X_val)[:, 1]
+    baseline_pipe.predict_proba(X_val)[:, 1]
     test_probs_base = baseline_pipe.predict_proba(X_test)[:, 1]
 
     metrics_registry["Baseline (TF-IDF + Naive Bayes)"] = evaluate.compute_all_metrics(
@@ -89,7 +86,7 @@ def run_full_benchmark():
     evaluate.plot_learning_curves(hist_orig, "FCC_Original_Upgraded", config.PLOTS_DIR / "original_learning_curve.png")
     model_orig.save(config.MODELS_DIR / "original.keras")
 
-    val_probs_orig = model_orig.predict(X_val, verbose=0).ravel()
+    model_orig.predict(X_val, verbose=0).ravel()
     test_probs_orig = model_orig.predict(X_test, verbose=0).ravel()
     metrics_registry["Original Rebuilt (AvgPool)"] = evaluate.compute_all_metrics(
         y_test, test_probs_orig, threshold=config.DEFAULT_THRESHOLD
@@ -114,7 +111,7 @@ def run_full_benchmark():
     evaluate.plot_learning_curves(hist_cnn, "1D_CNN", config.PLOTS_DIR / "cnn_learning_curve.png")
     model_cnn.save(config.MODELS_DIR / "cnn.keras")
 
-    val_probs_cnn = model_cnn.predict(X_val, verbose=0).ravel()
+    model_cnn.predict(X_val, verbose=0).ravel()
     test_probs_cnn = model_cnn.predict(X_test, verbose=0).ravel()
     metrics_registry["1D CNN (N-Gram Filters)"] = evaluate.compute_all_metrics(
         y_test, test_probs_cnn, threshold=config.DEFAULT_THRESHOLD
@@ -164,7 +161,7 @@ def run_full_benchmark():
     evaluate.plot_learning_curves(hist_trans, "Transformer_Lite", config.PLOTS_DIR / "transformer_learning_curve.png")
     model_trans.save(config.MODELS_DIR / "transformer.keras")
 
-    val_probs_trans = model_trans.predict(X_val, verbose=0).ravel()
+    model_trans.predict(X_val, verbose=0).ravel()
     test_probs_trans = model_trans.predict(X_test, verbose=0).ravel()
     metrics_registry["Transformer-Lite (Self-Attention)"] = evaluate.compute_all_metrics(
         y_test, test_probs_trans, threshold=config.DEFAULT_THRESHOLD
