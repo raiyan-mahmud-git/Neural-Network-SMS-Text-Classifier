@@ -25,16 +25,16 @@ This project implements modern deep learning architectures, in-graph tokenizatio
 
 ```mermaid
 flowchart TD
-    A["Raw SMS Text Input"] --> B["Domain Token Normalization\n(<URL>, <PHONE>, <MONEY>)"]
-    B --> C["In-Graph TextVectorization Layer\n(Embedded in Computation Graph)"]
-    C --> D["Token & Positional Embeddings"]
-    D --> E["Feature Extraction Block\n(TF-IDF Baseline / 1D CNN / BiLSTM / Transformer-Lite)"]
+    A["Raw SMS Text Input"] --> B["Domain Token Normalization<br/>URL, PHONE, MONEY tokens"]
+    B --> C["In-Graph TextVectorization Layer<br/>Embedded in Computation Graph"]
+    C --> D["Token + Positional Embeddings"]
+    D --> E["Feature Extraction Block<br/>TF-IDF / 1D CNN / BiLSTM / Transformer-Lite"]
     E --> F["Dense Layers + Dropout + LayerNorm"]
-    F --> G["Sigmoid Output: P(Spam) in [0.0, 1.0]"]
-    G --> H{"Cost-Tuned Threshold T\n(Default: 0.50 | Tuned: 0.95)"}
-    H -->|P >= T| I["🚨 Flagged as SPAM"]
-    H -->|P < T| J["✅ Delivered as HAM"]
-    G --> K["Word-Level Occlusion Attribution\n(Explainability Engine)"]
+    F --> G["Sigmoid Output: P of Spam in 0.0 to 1.0"]
+    G --> H{"Cost-Tuned Threshold T<br/>Default 0.50 or Tuned 0.95"}
+    H -->|P >= T| I["Flagged as SPAM"]
+    H -->|P < T| J["Delivered as HAM"]
+    G --> K["Word-Level Occlusion Attribution<br/>Explainability Engine"]
 ```
 
 ### Why Preprocessing Lives Inside the Model (`TextVectorization`)
