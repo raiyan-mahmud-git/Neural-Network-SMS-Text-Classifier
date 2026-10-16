@@ -15,14 +15,12 @@ Systematic grid or random search explores the trade-off between capacity (preven
 underfitting) and regularization (preventing memorization/overfitting).
 """
 
+import itertools
 import json
 import logging
-from pathlib import Path
-from typing import Dict, Any, List
-import itertools
-import numpy as np
+from typing import Any
 
-import tensorflow as tf
+import numpy as np
 from tensorflow import keras
 
 import config
@@ -37,7 +35,7 @@ def run_hyperparameter_sweep(
     max_trials: int = 8,
     epochs_per_trial: int = 6,
     seed: int = config.SEED
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Executes a structured hyperparameter exploration on the validation set.
     """
