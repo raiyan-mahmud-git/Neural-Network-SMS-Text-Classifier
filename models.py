@@ -20,6 +20,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 import config
+
 # 1. Classical Scikit-Learn Baseline
 
 def build_baseline_tfidf(model_type: str = "nb") -> Pipeline:
