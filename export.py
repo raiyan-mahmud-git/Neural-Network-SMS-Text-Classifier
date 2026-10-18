@@ -6,10 +6,6 @@ Measures and compares:
 2. Single-sample inference latency (milliseconds)
 3. Throughput (inferences per second)
 
-WHY THIS MATTERS:
-In production edge/mobile environments (e.g. on-device SMS spam filtering in iOS/Android),
-memory budgets and battery consumption are strict. TFLite strips training graphs,
-optimizes memory buffers, and fuses operators for ultra-low latency inference.
 """
 
 import logging
@@ -30,11 +26,11 @@ logger = logging.getLogger(__name__)
 
 def export_models_and_benchmark(num_benchmark_runs: int = 100) -> dict[str, Any]:
     """
-    Exports the trained model to .keras and TFLite, then benchmarks latency and size.
+    Exports the trained model to .keras and TFLite.
     """
     model = get_inference_model()
 
-    # 1. Ensure .keras format is saved
+    # 1. .keras format is saved
     keras_path = config.BEST_MODEL_PATH
     model.save(keras_path)
     keras_size_kb = os.path.getsize(keras_path) / 1024.0
@@ -44,7 +40,7 @@ def export_models_and_benchmark(num_benchmark_runs: int = 100) -> dict[str, Any]
     logger.info("Converting Keras model to TensorFlow Lite (TFLite)...")
     try:
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
-        # Enable Flex delegate for string vectorization ops if required
+        # Enable Flex delegate for string vectorization ops
         converter.target_spec.supported_ops = [
             tf.lite.OpsSet.TFLITE_BUILTINS,
             tf.lite.OpsSet.SELECT_TF_OPS
@@ -76,7 +72,7 @@ def export_models_and_benchmark(num_benchmark_runs: int = 100) -> dict[str, Any]
     keras_total_time = time.perf_counter() - start_time
     keras_latency_ms = (keras_total_time / num_benchmark_runs) * 1000.0
 
-    # Benchmark TFLite Model if exported
+    # Benchmark TFLite Model
     if tflite_success and tflite_path.exists():
         try:
             interpreter = tf.lite.Interpreter(model_path=str(tflite_path))
