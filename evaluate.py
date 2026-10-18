@@ -1,10 +1,6 @@
 """
 Comprehensive Evaluation, Error Analysis, Threshold Tuning & Model Explainability.
 
-WHY THIS MATTERS:
-Evaluation is where machine learning meets reality. Accuracy is deceptive on imbalanced datasets.
-A senior ML engineer must inspect Precision-Recall trade-offs, calibrate probabilities,
-audit false positives/negatives, verify cross-validation stability, and explain individual predictions.
 """
 
 import logging
@@ -40,14 +36,6 @@ def compute_all_metrics(y_true: np.ndarray, y_prob: np.ndarray, threshold: float
     """
     Computes a comprehensive suite of binary classification metrics.
 
-    WHY METRICS BEYOND ACCURACY MATTER:
-    - Accuracy: Misleading when 87% of messages are Ham (a dummy model gets 87%).
-    - Precision: Of all messages flagged as spam, what fraction actually was spam? (Minimizes false alarms).
-    - Recall: Of all actual spam, what fraction did we catch? (Minimizes spam leakage).
-    - F1-Score: Harmonic mean of precision and recall.
-    - ROC-AUC: Ranking ability across all thresholds (true positive rate vs false positive rate).
-    - PR-AUC (Average Precision): Evaluates precision vs recall across thresholds—the gold standard for imbalanced classes.
-    - Brier Score: Mean squared error of probabilities, measuring probability calibration (lower is better).
     """
     y_pred = (y_prob >= threshold).astype(int)
     cm = confusion_matrix(y_true, y_pred)
@@ -79,11 +67,6 @@ def tune_decision_threshold(
     """
     Sweeps decision thresholds [0.05, 0.95] to find the optimal operating point.
 
-    WHY THRESHOLD TUNING MATTERS:
-    Standard argmax / 0.5 thresholding assumes a False Positive (marking your doctor's appointment
-    or bank 2FA code as spam) has the exact same cost as a False Negative (a spam promo reaching inbox).
-    In reality, a False Positive destroys user trust. By weighting FP cost higher, we can select
-    a threshold that aggressively protects legitimate messages.
     """
     thresholds = np.linspace(0.05, 0.95, 91)
     records = []
@@ -99,7 +82,7 @@ def tune_decision_threshold(
         cm = confusion_matrix(y_val, preds)
         tn, fp, fn, _tp = cm.ravel()
 
-        # Custom cost: prioritize F1 while heavily penalizing FP
+       
         # score = F1 - (fp_cost_weight * (fp / len(y_val)))
         cost_penalized_score = f1 - (fp_cost_weight * (fp / max(1, (tn + fp))))
 
@@ -177,13 +160,8 @@ def plot_learning_curves(history: keras.callbacks.History, model_name: str, save
 
 def plot_calibration_curves(models_dict: dict[str, tuple[np.ndarray, np.ndarray]], save_path: Path) -> None:
     """
-    Generates a Reliability Diagram (Calibration Curve) for evaluated models.
+    Generates a Reliability Diagram for evaluated models.
 
-    WHY CALIBRATION MATTERS:
-    A model outputting 0.90 should be right 9 times out of 10. Modern deep neural nets
-    frequently suffer from overconfidence (outputting 0.999 for uncertain cases).
-    Plotting observed fraction of positives against mean predicted probability
-    visualizes whether model probabilities can be trusted as real risk estimates.
     """
     plt.figure(figsize=(8, 6))
     plt.plot([0, 1], [0, 1], "k:", label="Perfect Calibration (Ideal)")
@@ -213,23 +191,17 @@ def perform_error_analysis(
     """
     Identifies and analyzes top False Positives and False Negatives.
 
-    WHY ERROR ANALYSIS MATTERS:
-    Aggregate metrics conceal what the model is actually failing on. By inspecting
-    specific messages that fooled the model, we uncover domain blind spots:
-    - False Positives (Ham classified as Spam): often contain urgent phrasing or sales references from friends.
-    - False Negatives (Spam classified as Ham): often subtle conversational spam without overt keywords.
     """
     preds = (y_prob >= threshold).astype(int)
 
     fp_mask = (y_true == 0) & (preds == 1)
     fn_mask = (y_true == 1) & (preds == 0)
 
-    # Top false positives: legitimate messages predicted with highest spam probability
+    # Top false positives
     fp_indices = np.where(fp_mask)[0]
     fp_sorted = fp_indices[np.argsort(-y_prob[fp_indices])][:top_n]
 
-    # Top false negatives: spam messages predicted with lowest spam probability
-    fn_indices = np.where(fn_mask)[0]
+    # Top false negatives
     fn_sorted = fn_indices[np.argsort(y_prob[fn_indices])][:top_n]
 
     false_positives = [
@@ -250,11 +222,6 @@ def explain_prediction_occlusion(text: str, predict_fn, top_k: int = 5) -> list[
     Word-level occlusion attribution:
     Measures the drop in spam probability when each word is removed.
 
-    WHY WORD OCCLUSION MATTERS:
-    Black-box models must be explainable. By systematically masking word w_i,
-    Delta P = P(spam | text) - P(spam | text without w_i).
-    A positive Delta P indicates the word actively pushes the model toward SPAM.
-    A negative Delta P indicates the word acts as an anchor for HAM.
     """
     words = text.split()
     if not words:
@@ -286,10 +253,6 @@ def run_stratified_cross_validation(
     """
     Performs 5-fold stratified cross-validation for a model.
 
-    WHY 5-FOLD CV MATTERS:
-    Single-split metrics have high variance on small datasets. Stratified 5-Fold
-    trains and tests on 5 non-overlapping folds, guaranteeing that every sample
-    is evaluated once in an out-of-fold setting, producing reliable Mean +/- Std.
     """
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
 
