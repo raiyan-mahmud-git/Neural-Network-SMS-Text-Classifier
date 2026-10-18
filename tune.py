@@ -9,12 +9,6 @@ Sweeps:
 - Dropout Rate: [0.2, 0.4]
 - Learning Rate: [5e-4, 1e-3, 2e-3]
 
-WHY HYPERPARAMETER TUNING MATTERS:
-Default hyperparameters rarely coincide with optimal model performance.
-Systematic grid or random search explores the trade-off between capacity (preventing
-underfitting) and regularization (preventing memorization/overfitting).
-"""
-
 import itertools
 import json
 import logging
@@ -67,14 +61,14 @@ def run_hyperparameter_sweep(
     for idx, params in enumerate(selected_combos, 1):
         logger.info(f"--- Trial {idx}/{len(selected_combos)}: {params} ---")
 
-        # Create tailored vectorizer
+        # Create vectorizer
         vectorizer = models.create_text_vectorizer(
             train_texts=X_train,
             vocab_size=params["vocab_size"],
             max_length=config.MAX_SEQUENCE_LENGTH
         )
 
-        # Build parameterized BiLSTM
+        # parameterized BiLSTM
         model = models.build_bilstm_model(
             vectorizer=vectorizer,
             embedding_dim=params["embed_dim"],
