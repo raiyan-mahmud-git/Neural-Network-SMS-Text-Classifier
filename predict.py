@@ -20,7 +20,7 @@ import data
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-# Global cache for the loaded model
+# Global cache
 _CACHED_MODEL = None
 _CACHED_THRESHOLD = config.DEFAULT_THRESHOLD
 
@@ -34,7 +34,7 @@ def get_inference_model() -> keras.Model:
     if _CACHED_MODEL is not None:
         return _CACHED_MODEL
 
-    # Check for best_model.keras, or any trained model in artifacts/models
+    # Check for best_model.keras
     candidate_paths = [
         config.BEST_MODEL_PATH,
         config.MODELS_DIR / "bilstm.keras",
@@ -46,7 +46,7 @@ def get_inference_model() -> keras.Model:
     for model_file in candidate_paths:
         if model_file.exists():
             try:
-                # Custom objects for Transformer if needed
+                # Custom objects for Transformer
                 import models
                 custom_objects = {
                     "PositionalEmbedding": models.PositionalEmbedding,
@@ -74,12 +74,10 @@ def predict_message(pred_text: str, threshold: float = config.DEFAULT_THRESHOLD)
     """
     Predicts whether a message is spam or ham.
 
-    Signature required by freeCodeCamp:
-    Returns [probability, "spam" or "ham"]
     """
     model = get_inference_model()
 
-    # Apply token normalization (<URL>, <PHONE>, <MONEY>)
+    # Apply token normalization
     cleaned = data.clean_text(pred_text)
 
     # Input tensor of shape (1,)
@@ -94,7 +92,6 @@ def predict_message(pred_text: str, threshold: float = config.DEFAULT_THRESHOLD)
 def test_predictions() -> bool:
     """
     Official freeCodeCamp validation suite.
-    Runs the 7 standard test messages and prints result.
     """
     test_messages = [
         "how are you doing today",
