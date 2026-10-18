@@ -10,7 +10,6 @@ Includes:
 
 """
 
-import config
 import numpy as np
 import tensorflow as tf
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -20,6 +19,7 @@ from sklearn.pipeline import Pipeline
 from tensorflow import keras
 from tensorflow.keras import layers
 
+import config
 
 
 # 1. Classical Scikit-Learn Baseline
