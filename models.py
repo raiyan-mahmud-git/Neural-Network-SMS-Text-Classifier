@@ -3,15 +3,11 @@ Model Architectures for SMS Spam Classification.
 
 Includes:
 1. Classical Baseline: TF-IDF + Multinomial Naive Bayes / Logistic Regression
-2. Rebuilt Original FCC Model: Embedding + GlobalAveragePooling1D + Dense
+2. FCC Model: Embedding + GlobalAveragePooling1D + Dense
 3. 1D CNN: Local n-gram feature detection
 4. Bidirectional LSTM: Sequential context learning with gating
 5. Transformer-Lite: Multi-head self-attention with positional embeddings
 
-WHY THIS MATTERS:
-Rather than sticking to one architecture, comparing linear baselines, convolutional,
-recurrent, and attention-based models reveals the trade-offs between parameter count,
-training speed, inductive bias, and classification accuracy.
 """
 
 import numpy as np
@@ -26,18 +22,13 @@ from tensorflow.keras import layers
 import config
 
 
-# ---------------------------------------------------------------------------
+
 # 1. Classical Scikit-Learn Baseline
-# ---------------------------------------------------------------------------
+
 def build_baseline_tfidf(model_type: str = "nb") -> Pipeline:
     """
-    Builds a TF-IDF feature extraction pipeline paired with Naive Bayes or Logistic Regression.
+    TF-IDF feature extraction pipeline paired with Naive Bayes or Logistic Regression.
 
-    WHY THIS MATTERS:
-    Always establish a simple, fast baseline first! TF-IDF + Naive Bayes/Logistic Regression
-    takes under a second to train, has negligible memory footprint, and frequently outperforms
-    poorly-tuned neural networks on small text datasets. It sets the minimum bar that any
-    deep learning model must beat to justify its operational complexity.
     """
     if model_type == "nb":
         clf = MultinomialNB(alpha=0.1)
@@ -56,19 +47,13 @@ def build_baseline_tfidf(model_type: str = "nb") -> Pipeline:
     return pipeline
 
 
-# ---------------------------------------------------------------------------
+
 # 2. TextVectorization Layer Setup
-# ---------------------------------------------------------------------------
+
 def create_text_vectorizer(train_texts: np.ndarray, vocab_size: int = config.VOCAB_SIZE, max_length: int = config.MAX_SEQUENCE_LENGTH) -> layers.TextVectorization:
     """
     Creates and adapts a Keras TextVectorization layer.
 
-    WHY THIS MATTERS:
-    In deprecated Keras code, `keras.preprocessing.text.Tokenizer` lived outside the model,
-    requiring custom pickling and fragile multi-step inference pipelines.
-    `TextVectorization` runs natively inside the TensorFlow computational graph.
-    When exported (to .keras or TFLite), the saved model accepts raw strings directly,
-    eliminating train/serve skew and dependency on external preprocessing code.
     """
     vectorizer = layers.TextVectorization(
         max_tokens=vocab_size,
@@ -76,14 +61,13 @@ def create_text_vectorizer(train_texts: np.ndarray, vocab_size: int = config.VOC
         output_sequence_length=max_length,
         standardize="lower_and_strip_punctuation"
     )
-    # Adapt vectorizer to the training vocabulary
+    # Adapt vectorizer
     vectorizer.adapt(train_texts)
     return vectorizer
 
 
-# ---------------------------------------------------------------------------
 # Helper: Standard Model Compiler
-# ---------------------------------------------------------------------------
+
 def _compile_model(model: keras.Model, learning_rate: float = config.LEARNING_RATE) -> keras.Model:
     """Compiles Keras model with Adam optimizer, binary crossentropy, and multi-metric tracking."""
     optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
@@ -101,9 +85,8 @@ def _compile_model(model: keras.Model, learning_rate: float = config.LEARNING_RA
     return model
 
 
-# ---------------------------------------------------------------------------
-# 3. Original FCC Architecture (Upgraded with TextVectorization)
-# ---------------------------------------------------------------------------
+# 3. FCC Architecture
+
 def build_original_model(
     vectorizer: layers.TextVectorization,
     embedding_dim: int = 32,
@@ -114,10 +97,6 @@ def build_original_model(
     Rebuilds freeCodeCamp's original model:
     Raw String -> TextVectorization -> Embedding -> GlobalAveragePooling1D -> Dense -> Output
 
-    WHY THIS MATTERS:
-    GlobalAveragePooling1D averages all word embeddings in a message, acting as a continuous
-    Bag-of-Words. It is blazing fast and lightweight, but completely invariant to word order
-    (it cannot distinguish 'win no cash' from 'cash win no').
     """
     inputs = keras.Input(shape=(1,), dtype=tf.string, name="text_input")
     x = vectorizer(inputs)
@@ -130,9 +109,8 @@ def build_original_model(
     return _compile_model(model, learning_rate=learning_rate)
 
 
-# ---------------------------------------------------------------------------
 # 4. 1D Convolutional Neural Network (CNN)
-# ---------------------------------------------------------------------------
+
 def build_cnn_model(
     vectorizer: layers.TextVectorization,
     embedding_dim: int = config.EMBEDDING_DIM,
@@ -146,10 +124,6 @@ def build_cnn_model(
     Builds a 1D CNN for Text Classification:
     Raw String -> TextVectorization -> Embedding -> Conv1D -> GlobalMaxPooling1D -> Dropout -> Dense -> Output
 
-    WHY THIS MATTERS:
-    A 1D convolution slides filter windows over consecutive words, acting as an automated
-    n-gram detector (e.g. kernel_size=3 captures trigrams like 'claim your prize' or 'call this number').
-    GlobalMaxPooling1D retains the strongest signal anywhere in the message regardless of position.
     """
     inputs = keras.Input(shape=(1,), dtype=tf.string, name="text_input")
     x = vectorizer(inputs)
@@ -165,9 +139,8 @@ def build_cnn_model(
     return _compile_model(model, learning_rate=learning_rate)
 
 
-# ---------------------------------------------------------------------------
-# 5. Bidirectional LSTM (BiLSTM)
-# ---------------------------------------------------------------------------
+# 5. Bidirectional LSTM
+
 def build_bilstm_model(
     vectorizer: layers.TextVectorization,
     embedding_dim: int = config.EMBEDDING_DIM,
@@ -180,11 +153,6 @@ def build_bilstm_model(
     Builds a Bidirectional LSTM Network:
     Raw String -> TextVectorization -> Embedding -> SpatialDropout1D -> BiLSTM -> Dense -> Output
 
-    WHY THIS MATTERS:
-    LSTMs maintain internal memory states through forget, input, and output gates.
-    The bidirectional wrapper reads text in both directions (forward and backward),
-    allowing words later in the SMS (e.g. 'call <PHONE>') to inform the interpretation
-    of words at the beginning ('urgent:', 'congratulations').
     """
     inputs = keras.Input(shape=(1,), dtype=tf.string, name="text_input")
     x = vectorizer(inputs)
@@ -199,17 +167,12 @@ def build_bilstm_model(
     return _compile_model(model, learning_rate=learning_rate)
 
 
-# ---------------------------------------------------------------------------
-# 6. Transformer-Lite (Multi-Head Self-Attention + Positional Encoding)
-# ---------------------------------------------------------------------------
+# 6. Transformer-Lite
+
 class PositionalEmbedding(layers.Layer):
     """
     Combines token embeddings with learnable positional embeddings.
 
-    WHY THIS MATTERS:
-    Self-attention processes all tokens in parallel, which makes it permutation-invariant
-    by default (it has no innate sense of order). Positional embeddings inject positional
-    indices (0, 1, 2...) so the attention heads know word order and relative positions.
     """
     def __init__(self, max_length: int, vocab_size: int, embed_dim: int, **kwargs):
         super().__init__(**kwargs)
@@ -241,10 +204,6 @@ class TransformerBlock(layers.Layer):
     Single Transformer Encoder Layer:
     MultiHeadAttention -> Add & Norm -> FeedForward -> Add & Norm
 
-    WHY THIS MATTERS:
-    Self-attention computes dynamic weights between all pairs of words, allowing
-    the model to connect distant words directly without passing information through
-    sequential recurrence steps. Residual connections prevent vanishing gradients.
     """
     def __init__(self, embed_dim: int, num_heads: int, ff_dim: int, dropout_rate: float = 0.1, **kwargs):
         super().__init__(**kwargs)
