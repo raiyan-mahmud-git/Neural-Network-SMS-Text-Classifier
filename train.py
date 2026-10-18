@@ -1,11 +1,5 @@
 """
-Model Training Pipeline with Early Stopping, Learning Rate Scheduling & Imbalance Strategies.
-
-WHY THIS MATTERS:
-A training script must be reproducible, modular, and resilient to overfitting.
-Hardcoding training loops prevents automated hyperparameter sweeps and CI automation.
-This script provides CLI parameters, callbacks, loss visualizations, and saves
-standalone self-contained artifacts.
+Model Training Pipeline
 """
 
 import argparse
@@ -29,13 +23,8 @@ logger = logging.getLogger(__name__)
 
 def plot_learning_curves(history: keras.callbacks.History, model_name: str, save_path: Path) -> None:
     """
-    Plots training and validation loss and PR-AUC curves to diagnose overfitting/underfitting.
-
-    WHY THIS MATTERS:
-    Learning curves are the primary visual diagnostic for training dynamics:
-    - Divergence (train loss dropping while val loss climbs) indicates overfitting -> add Dropout/L2.
-    - Flat loss indicates underfitting or learning rate too high/low.
-    - Jittery curves indicate batch size too small or LR needing decay.
+    Plots training and validation loss and PR-AUC curves to diagnose overfitting
+    
     """
     epochs_range = range(1, len(history.history["loss"]) + 1)
 
@@ -115,7 +104,7 @@ def train_single_neural_model(
         )
     ]
 
-    # Handle class imbalance
+    # class imbalance
     class_weights = None
     if imbalance_strategy == "class_weight":
         class_weights = data.get_class_weights(y_train)
@@ -138,7 +127,7 @@ def train_single_neural_model(
     plot_path = config.PLOTS_DIR / f"{model_name}_learning_curve.png"
     plot_learning_curves(history, model_name, plot_path)
 
-    # Save final model explicitly as .keras
+    # Save final model
     model.save(checkpoint_path)
     logger.info(f"Model saved to {checkpoint_path}")
 
@@ -204,10 +193,10 @@ def main() -> None:
 
     config.set_seed(args.seed)
 
-    # Prepare leak-free stratified 3-way split
+    # leak-free
     X_train, y_train, X_val, y_val, _X_test, _y_test = data.get_stratified_3way_splits(seed=args.seed)
 
-    # Create & adapt TextVectorization layer on training set ONLY
+    # Create & adapt TextVectorization layer
     logger.info("Adapting TextVectorization on training corpus...")
     vectorizer = models.create_text_vectorizer(X_train)
 
