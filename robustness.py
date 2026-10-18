@@ -8,10 +8,6 @@ Tests:
 4. Emoji injection ("🎁 Win $1000 cash! 💰 Click now!")
 5. Out-of-Distribution (OOD): Code snippets, Shakespeare, legal disclaimers.
 
-WHY THIS MATTERS:
-Spammers deliberately use evasion techniques to bypass word-level filters.
-Evaluating robustness reveals structural blind spots of standard tokenizers/embeddings,
-and motivates character-level normalization or adversarial augmentation.
 """
 
 import logging
@@ -22,7 +18,7 @@ from predict import predict_message
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-# Dictionary of leetspeak substitutions commonly used by spammers
+# Dictionary used by spammers
 LEET_MAP = {
     "0": "o", "1": "i", "3": "e", "4": "a", "5": "s",
     "7": "t", "8": "b", "@": "a", "$": "s", "!": "i"
@@ -47,19 +43,14 @@ OUT_OF_DISTRIBUTION_SAMPLES = [
 
 def deobfuscate_leetspeak(text: str) -> str:
     """
-    Applies character-level deobfuscation to neutralize leetspeak evasion.
-
-    WHY THIS MATTERS:
-    When a spammer writes 'fr33 pr1ze', a standard word-level tokenizer maps 'fr33'
-    to <OOV>, completely losing the spam intent. Mapping common leet substitutions
-    back to standard alphabet characters restores the semantic keyword.
+    Applies character-level deobfuscation.
     """
     normalized = []
     for char in text.lower():
         normalized.append(LEET_MAP.get(char, char))
     reconstructed = "".join(normalized)
 
-    # Collapse repetitive spaced characters (e.g. 'c a l l' -> 'call')
+    # Collapse repetitive spaced characters
     reconstructed = re.sub(r"(?<=\b\w)\s(?=\w\b)", "", reconstructed)
     return reconstructed
 
@@ -70,7 +61,7 @@ def run_robustness_benchmark() -> dict[str, list[dict[str, any]]]:
 
     adv_results = []
     for category, sample in ADVERSARIAL_SPAM_SAMPLES:
-        # 1. Raw prediction without deobfuscation
+        # 1. Raw prediction
         raw_prob, raw_label = predict_message(sample)
 
         # 2. Prediction with leetspeak deobfuscation
