@@ -8,7 +8,7 @@ Sweeps:
 - Recurrent/Hidden Units: [16, 32, 64]
 - Dropout Rate: [0.2, 0.4]
 - Learning Rate: [5e-4, 1e-3, 2e-3]
-
+"""
 import itertools
 import json
 import logging
@@ -31,7 +31,7 @@ def run_hyperparameter_sweep(
     seed: int = config.SEED
 ) -> dict[str, Any]:
     """
-    Executes a structured hyperparameter exploration on the validation set.
+    Execute hyperparameter
     """
     config.set_seed(seed)
     X_train, y_train, X_val, y_val, _, _ = data.get_stratified_3way_splits(seed=seed)
