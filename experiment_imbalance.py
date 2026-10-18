@@ -6,11 +6,6 @@ Compares:
 2. Algorithmic Reweighting (class_weight)
 3. Data-Level Resampling (Oversampling minority class)
 
-WHY THIS MATTERS:
-Evaluating accuracy on an 86.6% Ham dataset creates a false sense of security.
-Comparing these strategies demonstrates how loss reweighting directly shifts the
-operating point towards higher recall (catching more spam) with measurable trade-offs
-in precision.
 """
 
 import json
@@ -41,7 +36,7 @@ def run_imbalance_experiment(epochs: int = 10) -> pd.DataFrame:
         logger.info(f"Running Imbalance Strategy: {strat}")
         config.set_seed(config.SEED)
 
-        # Build consistent architecture (CNN for rapid reproducible convergence)
+        # Consistent architecture
         model = models.build_cnn_model(vectorizer)
 
         cw = None
