@@ -17,9 +17,8 @@ import config
 from data import clean_text
 from predict import predict_message
 
-# ---------------------------------------------------------------------------
 # 1. FreeCodeCamp Official Benchmark Verification
-# ---------------------------------------------------------------------------
+
 FCC_TEST_CASES = [
     ("how are you doing today", "ham"),
     ("sale today! to stop texts call 98912460324", "spam"),
@@ -42,9 +41,9 @@ def test_fcc_official_cases(message: str, expected_label: str):
     assert label == expected_label, f"Message '{message}' predicted as '{label}', expected '{expected_label}' (Prob: {prob:.4f})"
 
 
-# ---------------------------------------------------------------------------
+
 # 2. Return Type & Mathematical Range Validation
-# ---------------------------------------------------------------------------
+
 def test_prediction_output_structure():
     """Ensures predict_message adheres strictly to [probability, label]."""
     result = predict_message("Check this out!")
@@ -55,9 +54,9 @@ def test_prediction_output_structure():
     assert label in ["spam", "ham"], f"Label must be 'spam' or 'ham', got {label}"
 
 
-# ---------------------------------------------------------------------------
+
 # 3. Edge Cases: Empty & Whitespace
-# ---------------------------------------------------------------------------
+
 @pytest.mark.parametrize("empty_input", ["", "   ", "\n\t\r"])
 def test_empty_and_whitespace_inputs(empty_input: str):
     """Empty or whitespace-only inputs should not throw exceptions and should default to ham."""
@@ -67,9 +66,9 @@ def test_empty_and_whitespace_inputs(empty_input: str):
     assert label == "ham", f"Empty text should not be flagged as spam, got {label}"
 
 
-# ---------------------------------------------------------------------------
+
 # 4. Stress Testing: Extremely Long Message
-# ---------------------------------------------------------------------------
+
 def test_very_long_message():
     """Models must handle messages exceeding max_length without dimension or shape mismatch errors."""
     long_msg = "hello friend how are you " * 500  # 2500 words
@@ -78,9 +77,9 @@ def test_very_long_message():
     assert 0.0 <= result[0] <= 1.0
 
 
-# ---------------------------------------------------------------------------
+
 # 5. Out-of-Domain & Multilingual Inputs
-# ---------------------------------------------------------------------------
+
 @pytest.mark.parametrize("foreign_text", [
     "Hola amigo, ¿quieres ir a almorzar mañana?",
     "Bonjour mon ami, comment ça va aujourd'hui?",
@@ -94,9 +93,9 @@ def test_multilingual_inputs(foreign_text: str):
     assert 0.0 <= result[0] <= 1.0
 
 
-# ---------------------------------------------------------------------------
+
 # 6. Preprocessing Normalization Tests
-# ---------------------------------------------------------------------------
+
 def test_clean_text_normalizations():
     """Verifies that regex normalization reliably extracts spam-indicative entity tokens."""
     url_text = "Visit https://spamprize.com or www.freegift.org for your reward"
