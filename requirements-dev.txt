@@ -1,0 +1,11 @@
+-r requirements.txt
+
+# UI, experimentation, export, tests, and linting.
+matplotlib==3.11.2
+seaborn==0.13.2
+optuna==5.0.0
+streamlit==1.66.0
+httpx2==2.16.0
+pytest==9.1.1
+ruff==0.17.1
+pip-tools==7.6.2

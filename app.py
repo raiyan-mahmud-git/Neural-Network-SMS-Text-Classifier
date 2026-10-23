@@ -49,9 +49,9 @@ with st.sidebar:
     threshold = st.slider(
         "Decision Threshold",
         min_value=0.10,
-        max_value=0.90,
+        max_value=0.99,
         value=config.DEFAULT_THRESHOLD,
-        step=0.05,
+        step=0.01,
         help="Messages with P(Spam) >= threshold are classified as SPAM. Increase threshold to minimize False Positives (blocking legitimate texts)."
     )
 
@@ -186,7 +186,7 @@ with tab2:
         C --> D["Feature Extractor (BiLSTM / CNN / Transformer)"]
         D --> E["Dense Layers with Dropout & L2 Regularization"]
         E --> F["Sigmoid Output: P(Spam)"]
-        F --> G{"Threshold T (Default: 0.50)"}
+        F --> G{"Threshold T (Default: 0.95)"}
         G -->|P >= T| H["🚨 SPAM"]
         G -->|P < T| I["✅ HAM"]
     ```

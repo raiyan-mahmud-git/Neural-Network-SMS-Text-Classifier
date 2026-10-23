@@ -1,0 +1,8 @@
+{
+  "model_id": "sms-spam-bilstm-v1",
+  "model_type": "Bidirectional LSTM",
+  "model_file": "best_model.keras",
+  "sha256": "dc651485f4074f31fa983bec185b4b2fb160e4a7db18d1f0521e3ae0c073071a",
+  "default_threshold": 0.95,
+  "threshold_metrics": "Bidirectional LSTM (Tuned Threshold) in artifacts/metrics.json"
+}

@@ -1,11 +1,10 @@
-# 🛡️ Production SMS Spam Classifier & Explainability Pipeline
+# 🛡️ SMS Spam Classifier & Explainability Pipeline
 
-[![CI Pipeline](https://github.com/example/sms-spam-classifier/actions/workflows/ci.yml/badge.svg)](https://github.com/example/sms-spam-classifier/actions)
+[![CI Pipeline](https://github.com/raiyan-mahmud-git/Neural-Network-SMS-Text-Classifier/actions/workflows/ci.yml/badge.svg)](https://github.com/raiyan-mahmud-git/Neural-Network-SMS-Text-Classifier/actions)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
-[![TensorFlow 2.16+](https://img.shields.io/badge/TensorFlow-2.x%20%2F%20Keras%203-orange.svg)](https://tensorflow.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![TensorFlow 2.21.0](https://img.shields.io/badge/TensorFlow-2.x%20%2F%20Keras%203-orange.svg)](https://tensorflow.org/)
 
-An end-to-end, production-ready Natural Language Processing (NLP) system that transforms the classic **freeCodeCamp SMS Spam Classifier** into a modular, portfolio-grade deep learning project.
+An end-to-end Natural Language Processing (NLP) project that turns the classic **freeCodeCamp SMS Spam Classifier** into a tested model, an authenticated HTTP service, and an interactive demo.
 
 ---
 
@@ -31,20 +30,20 @@ flowchart TD
     D --> E["Feature Extraction Block<br/>TF-IDF / 1D CNN / BiLSTM / Transformer-Lite"]
     E --> F["Dense Layers + Dropout + LayerNorm"]
     F --> G["Sigmoid Output: P of Spam in 0.0 to 1.0"]
-    G --> H{"Cost-Tuned Threshold T<br/>Default 0.50 or Tuned 0.95"}
+    G --> H{"Cost-Tuned Threshold T<br/>Default 0.95 (tuned BiLSTM)"}
     H -->|P >= T| I["Flagged as SPAM"]
     H -->|P < T| J["Delivered as HAM"]
     G --> K["Word-Level Occlusion Attribution<br/>Explainability Engine"]
 ```
 
 ### Why Preprocessing Lives Inside the Model (`TextVectorization`)
-In legacy Keras code, `tf.keras.preprocessing.text.Tokenizer` lived as a separate Python pickle object. This introduced **train-serve skew**: if the tokenizer file was missing or out of sync with production, the model would fail silently or produce nonsense predictions. By moving tokenization into Keras 3's native `TextVectorization` layer, the entire pipeline is self-contained: the saved `.keras` or `.tflite` model ingests raw strings directly.
+In legacy Keras code, `tf.keras.preprocessing.text.Tokenizer` lived as a separate Python pickle object. This introduced **train-serve skew**: if the tokenizer file was missing or out of sync with production, the model would fail silently or produce nonsense predictions. By moving tokenization into Keras 3's native `TextVectorization` layer, the entire pipeline is self-contained: the saved `.keras` model ingests raw strings directly. The current serving artifact is a `.keras` archive.
 
 ---
 
-## 📊 3. Official Benchmark Results (Test Set)
+## 📊 3. Reported Benchmark Results (Internal Holdout)
 
-All models were evaluated on the exact same leak-free, stratified test split ($N = 774$, 97 Spam, 677 Ham):
+The reported metrics come from the same stratified internal holdout ($N = 774$, 97 Spam, 677 Ham) created by combining the FreeCodeCamp train and validation files, then splitting the combined data. Treat these as development results; they are not an independent, real-world deployment evaluation:
 
 | Model Architecture | Accuracy | Precision | Recall | F1-Score | PR-AUC | ROC-AUC | Brier Score | False Positives | False Negatives |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -55,6 +54,8 @@ All models were evaluated on the exact same leak-free, stratified test split ($N
 | **Bidirectional LSTM (Default T=0.50)**| 97.80% | 85.09% | **100.00%** | 0.9194 | 0.9903 | 0.9986 | 0.0190 | 17 | **0** |
 | **Original Rebuilt (AvgPool Unweighted)**| 12.53% | 12.53% | 100.00% | 0.2227 | 0.1253 | 0.5000 | 0.2501 | 677 | 0 |
 
+> **Serving model:** `artifacts/models/best_model.keras` is the tuned Bidirectional LSTM. The API, CLI, and demo use a default decision threshold of **0.95**, matching the tuned-threshold result below. The CNN row is a separate benchmark; the service does not load `cnn.keras`.
+>
 > **Key Architectural Takeaways**:
 > 1. **1D CNN** achieves the best overall balance (**96.48% F1**, **0.9958 PR-AUC**), missing only a single spam message out of 97 while keeping false alarms to 6. Convolutions act as local trigram detectors, catching signatures like `"claim your prize"` anywhere in the text.
 > 2. **Naive Bayes** sets an exceptionally high bar (98.97% accuracy, 96.84% precision), proving why classical baselines must always be benchmarked first.
@@ -90,7 +91,7 @@ Inspecting aggregate metrics hides specific failure modes. We audited the top Fa
 
 ### False Negatives (Spam Escaping to Inbox)
 1. *"dear voucher holder 2 claim your 1st class airport lounge passes when using your holiday voucher call <PHONE> . when booking quote 1st class x 2"* (Prob: `0.9098`)
-   - **Root Cause**: When the threshold is tuned to $T=0.95$ to strictly eliminate false alarms, messages scoring ~0.91 slip through. At standard $T=0.50$, it is caught instantly.
+   - **Root Cause**: When the threshold is tuned to $T=0.95$ to reduce false alarms, messages scoring ~0.91 slip through. At standard $T=0.50$, it is caught instantly.
 
 ---
 
@@ -107,14 +108,13 @@ Attackers use leetspeak, spacing, and emojis to evade text filters:
 
 ---
 
-## ⚡ 7. Deployment: Format, Latency & Edge Optimization
+## ⚡ 7. Deployment and Export Status
 
-We benchmarked model export formats across 100 benchmark inferences:
+The REST container serves the verified `artifacts/models/best_model.keras` archive (6,644,503 bytes, about 6.34 MiB). Its SHA-256 and serving threshold are recorded in `artifacts/model_manifest.json` and checked before the service starts.
 
-| Model Format | Target Environment | Artifact Size | Latency per Sample | Throughput |
-| :--- | :--- | :---: | :---: | :---: |
-| **Keras 3 Archive (`.keras`)** | Cloud Server / Python Backend | ~1,200 KB | ~8.4 ms | ~119 samples/sec |
-| **TensorFlow Lite (`.tflite`)** | Mobile (iOS/Android) / Edge IoT | **~420 KB** | **~3.8 ms** | **~263 samples/sec** |
+A TensorFlow Lite model is **not included** in this repository. Run `python export.py` to attempt conversion and benchmark the current artifact. The exporter reports measured values only; unsupported conversion or interpreter operations are reported as failures instead of estimated size or latency.
+
+The API requires an `API_KEY` secret of at least 32 characters. Keep it in the deployment platform's secret manager, expose the service through HTTPS, and configure any shared or multi-replica rate limit at the ingress/API gateway. The application also enforces a per-process request limit.
 
 ---
 
@@ -122,11 +122,18 @@ We benchmarked model export formats across 100 benchmark inferences:
 
 ### 1. Installation
 ```bash
-git clone https://github.com/example/sms-spam-classifier.git
-cd sms-spam-classifier
+git clone https://github.com/raiyan-mahmud-git/Neural-Network-SMS-Text-Classifier.git
+cd Neural-Network-SMS-Text-Classifier
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .\.venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements-dev.lock
+```
+
+Direct dependency pins live in `requirements.txt` and `requirements-dev.txt`; the lock files include their resolved transitive versions. After changing direct dependencies, regenerate both locks:
+
+```bash
+pip-compile --resolver=backtracking --allow-unsafe --no-annotate --no-header --output-file requirements.lock requirements.txt
+pip-compile --resolver=backtracking --allow-unsafe --no-annotate --no-header --output-file requirements-dev.lock requirements-dev.txt
 ```
 
 ### 2. Verify FreeCodeCamp Tests
@@ -167,21 +174,41 @@ python train.py --model baseline
 streamlit run app.py
 ```
 
-### 6. Run via Docker
+### 6. Run the authenticated API in Docker
+
+Create a random key, put it in a local `.env` file (ignored by Git), and do not commit or bake it into the image:
+
 ```bash
+API_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+printf 'API_KEY=%s\n' "$API_KEY" > .env
 docker build -t sms-classifier .
-docker run -p 8000:8000 sms-classifier
-# Test endpoint: curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d '{"message": "Win $1000 now!"}'
+docker run --rm --env-file .env -p 8000:8000 sms-classifier
 ```
+
+`GET /health` is the unauthenticated container readiness probe. `POST /predict` requires `X-API-Key`:
+
+```bash
+curl http://localhost:8000/health
+curl -X POST http://localhost:8000/predict \
+  -H "X-API-Key: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Win $1000 now!"}'
+```
+
+The request threshold defaults to `0.95` and may be explicitly set between `0.0` and `1.0`. The container fails to start if its secret or verified model artifact is missing.
 
 ---
 
 ## 📈 9. Project Directory Structure
 
 ```
-sms-spam-classifier/
+Neural-Network-SMS-Text-Classifier/
 ├── README.md                  # Comprehensive portfolio documentation
-├── requirements.txt           # Pinned production dependencies
+├── requirements.txt           # Pinned API/runtime dependencies
+├── requirements.lock          # Fully resolved production dependency versions
+├── requirements-dev.txt       # Direct UI, training, testing, and lint dependencies
+├── requirements-dev.lock      # Fully resolved development dependency versions
+├── .dockerignore              # Keeps local data and environments out of builds
 ├── config.py                  # Central hyperparameter & path configurations
 ├── data.py                    # Cross-platform download, regex normalizer, 3-way split
 ├── models.py                  # Baseline, CNN, BiLSTM, and Transformer-Lite architectures
@@ -193,15 +220,18 @@ sms-spam-classifier/
 ├── tune.py                    # Systematic hyperparameter optimization sweep
 ├── export.py                  # .keras and TFLite export & latency benchmarking
 ├── app.py                     # Interactive Streamlit dashboard with word attribution
-├── api.py                     # Production FastAPI REST microservice with Pydantic validation
-├── Dockerfile                 # Containerization specification
+├── api.py                     # API key protected FastAPI service with rate limiting
+├── Dockerfile                 # Non-root production container
+├── .env.example               # Secret configuration template
 ├── pytest.ini                 # Pytest configuration
 ├── notebooks/
 │   └── exploration.ipynb      # Complete exploratory data analysis & visualization
 ├── tests/
-│   └── test_predict.py        # 17 unit and edge case tests
+│   ├── test_predict.py        # Model and preprocessing tests
+│   └── test_api.py            # Authentication and API contract tests
 └── artifacts/
-    ├── models/                # Saved .keras & .tflite weights
+    ├── models/                # Saved Keras model artifacts
+    ├── model_manifest.json    # Deployed model hash and decision threshold
     ├── plots/                 # High-resolution ROC/PR, loss, and calibration charts
     └── metrics.json           # Comprehensive evaluation registry
 ```

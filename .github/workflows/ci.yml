@@ -6,9 +6,13 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - name: Check out repository
@@ -19,16 +23,57 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
+          cache-dependency-path: requirements-dev.lock
 
-      - name: Install dependencies
+      - name: Install pinned dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.lock
 
       - name: Lint with Ruff
-        run: |
-          ruff check . --ignore E501
+        run: ruff check . --ignore E501
 
-      - name: Run Test Suite with Pytest
+      - name: Run tests
+        run: pytest tests/ -v
+
+      - name: Build and smoke-test the production container
+        env:
+          TEST_API_KEY: ci-test-key-that-is-long-enough-for-startup-validation
         run: |
-          pytest tests/ -v
+          set -euo pipefail
+          image="sms-classifier:ci"
+          container="sms-classifier-ci"
+          cleanup() { docker rm -f "$container" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+
+          docker build --tag "$image" .
+          docker run --detach --name "$container" \
+            --publish 8000:8000 \
+            --env "API_KEY=$TEST_API_KEY" \
+            "$image"
+
+          ready=0
+          for attempt in $(seq 1 90); do
+            if curl --fail --silent http://127.0.0.1:8000/health >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            docker logs "$container"
+            exit 1
+          fi
+
+          result=$(curl --fail --silent \
+            --header "X-API-Key: $TEST_API_KEY" \
+            --header "Content-Type: application/json" \
+            --data '{"message":"sale today! to stop texts call 98912460324","threshold":0.5}' \
+            http://127.0.0.1:8000/predict)
+          python -c 'import json,sys; assert json.loads(sys.argv[1])["is_spam"] is True' "$result"
+
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --header "Content-Type: application/json" \
+            --data '{"message":"hello"}' \
+            http://127.0.0.1:8000/predict)
+          test "$status" = "401"

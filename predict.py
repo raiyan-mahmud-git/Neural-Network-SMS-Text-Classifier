@@ -8,6 +8,8 @@ Provides:
 """
 
 import argparse
+import hashlib
+import json
 import logging
 import sys
 
@@ -27,46 +29,44 @@ _CACHED_THRESHOLD = config.DEFAULT_THRESHOLD
 
 def get_inference_model() -> keras.Model:
     """
-    Loads and caches the best saved Keras model.
-    Falls back to building and training a quick model if no saved model is found.
+    Verifies and loads the selected Keras artifact without training or downloads.
     """
     global _CACHED_MODEL
     if _CACHED_MODEL is not None:
         return _CACHED_MODEL
 
-    # Check for best_model.keras
-    candidate_paths = [
-        config.BEST_MODEL_PATH,
-        config.MODELS_DIR / "bilstm.keras",
-        config.MODELS_DIR / "cnn.keras",
-        config.MODELS_DIR / "original.keras",
-        config.MODELS_DIR / "transformer.keras"
-    ]
+    model_file = config.BEST_MODEL_PATH
+    if not model_file.is_file():
+        raise FileNotFoundError(f"Required inference model is missing: {model_file}")
+    if not config.MODEL_MANIFEST_FILE.is_file():
+        raise FileNotFoundError(f"Required model manifest is missing: {config.MODEL_MANIFEST_FILE}")
 
-    for model_file in candidate_paths:
-        if model_file.exists():
-            try:
-                # Custom objects for Transformer
-                import models
-                custom_objects = {
-                    "PositionalEmbedding": models.PositionalEmbedding,
-                    "TransformerBlock": models.TransformerBlock
-                }
-                _CACHED_MODEL = keras.models.load_model(model_file, custom_objects=custom_objects)
-                logger.info(f"Loaded trained model from {model_file.name}")
-                return _CACHED_MODEL
-            except Exception as e: # noqa: BLE001
-                logger.warning(f"Could not load {model_file}: {e}")
+    with config.MODEL_MANIFEST_FILE.open(encoding="utf-8") as manifest_file:
+        manifest = json.load(manifest_file)
 
-    # If no model found on disk, train a lightweight model on the fly
-    logger.info("No saved model found. Training lightweight FCC model for instant inference...")
+    expected_name = manifest.get("model_file")
+    expected_hash = manifest.get("sha256")
+    expected_threshold = manifest.get("default_threshold")
+    if expected_name != model_file.name or not isinstance(expected_hash, str):
+        raise RuntimeError("Model manifest does not describe the configured inference artifact")
+    if expected_threshold != config.DEFAULT_THRESHOLD:
+        raise RuntimeError("Configured threshold does not match the model manifest")
+
+    actual_hash = hashlib.sha256(model_file.read_bytes()).hexdigest()
+    if actual_hash != expected_hash:
+        raise RuntimeError("Inference model checksum does not match the model manifest")
+
     import models
-    X_train, y_train, X_val, y_val, _, _ = data.get_stratified_3way_splits()
-    vec = models.create_text_vectorizer(X_train)
-    _CACHED_MODEL = models.build_original_model(vec)
-    cw = data.get_class_weights(y_train)
-    _CACHED_MODEL.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=5, batch_size=32, class_weight=cw, verbose=0)
-    _CACHED_MODEL.save(config.BEST_MODEL_PATH)
+    custom_objects = {
+        "PositionalEmbedding": models.PositionalEmbedding,
+        "TransformerBlock": models.TransformerBlock
+    }
+    _CACHED_MODEL = keras.models.load_model(
+        model_file,
+        custom_objects=custom_objects,
+        compile=False,
+    )
+    logger.info("Loaded verified inference model %s", model_file.name)
     return _CACHED_MODEL
 
 

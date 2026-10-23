@@ -27,8 +27,9 @@ VALID_FILE = DATA_DIR / "valid-data.tsv"
 CLEANED_DATA_FILE = DATA_DIR / "sms_cleaned.parquet"
 
 # Best saved model path for serving/FCC evaluation
-BEST_MODEL_PATH = MODELS_DIR / "best_model.keras"
+BEST_MODEL_PATH = Path(os.getenv("SMS_MODEL_PATH", str(MODELS_DIR / "best_model.keras")))
 BEST_TFLITE_PATH = MODELS_DIR / "best_model.tflite"
+MODEL_MANIFEST_FILE = ARTIFACTS_DIR / "model_manifest.json"
 
 # Ensure runtime directories exist
 for folder in [DATA_DIR, ARTIFACTS_DIR, MODELS_DIR, PLOTS_DIR]:
@@ -52,7 +53,9 @@ PATIENCE_EARLY_STOPPING = 4     # Restore best weights when val_loss plateaus
 PATIENCE_REDUCE_LR = 2          # Halve LR when loss stagnates
 
 # Classification & Thresholding
-DEFAULT_THRESHOLD = 0.5         
+# best_model.keras is the tuned BiLSTM artifact; keep its validated serving
+# threshold aligned with artifacts/model_manifest.json.
+DEFAULT_THRESHOLD = 0.95
 
 # Special entity tokens
 URL_TOKEN = "<URL>"
