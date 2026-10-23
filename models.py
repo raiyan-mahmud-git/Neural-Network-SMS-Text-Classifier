@@ -21,7 +21,6 @@ from tensorflow.keras import layers
 
 import config
 
-# 1. Classical Scikit-Learn Baseline
 
 def build_baseline_tfidf(model_type: str = "nb") -> Pipeline:
     """
@@ -46,7 +45,6 @@ def build_baseline_tfidf(model_type: str = "nb") -> Pipeline:
 
 
 
-# 2. TextVectorization Layer Setup
 
 def create_text_vectorizer(train_texts: np.ndarray, vocab_size: int = config.VOCAB_SIZE, max_length: int = config.MAX_SEQUENCE_LENGTH) -> layers.TextVectorization:
     """
@@ -59,12 +57,10 @@ def create_text_vectorizer(train_texts: np.ndarray, vocab_size: int = config.VOC
         output_sequence_length=max_length,
         standardize="lower_and_strip_punctuation"
     )
-    # Adapt vectorizer
     vectorizer.adapt(train_texts)
     return vectorizer
 
 
-# Helper: Standard Model Compiler
 
 def _compile_model(model: keras.Model, learning_rate: float = config.LEARNING_RATE) -> keras.Model:
     """Compiles Keras model with Adam optimizer, binary crossentropy, and multi-metric tracking."""
@@ -83,7 +79,6 @@ def _compile_model(model: keras.Model, learning_rate: float = config.LEARNING_RA
     return model
 
 
-# 3. FCC Architecture
 
 def build_original_model(
     vectorizer: layers.TextVectorization,
@@ -107,7 +102,6 @@ def build_original_model(
     return _compile_model(model, learning_rate=learning_rate)
 
 
-# 4. 1D Convolutional Neural Network (CNN)
 
 def build_cnn_model(
     vectorizer: layers.TextVectorization,
@@ -137,7 +131,6 @@ def build_cnn_model(
     return _compile_model(model, learning_rate=learning_rate)
 
 
-# 5. Bidirectional LSTM
 
 def build_bilstm_model(
     vectorizer: layers.TextVectorization,
@@ -165,7 +158,6 @@ def build_bilstm_model(
     return _compile_model(model, learning_rate=learning_rate)
 
 
-# 6. Transformer-Lite
 
 class PositionalEmbedding(layers.Layer):
     """

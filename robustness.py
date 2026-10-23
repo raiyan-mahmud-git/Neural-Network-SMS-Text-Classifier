@@ -18,7 +18,6 @@ from predict import predict_message
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-# Dictionary used by spammers
 LEET_MAP = {
     "0": "o", "1": "i", "3": "e", "4": "a", "5": "s",
     "7": "t", "8": "b", "@": "a", "$": "s", "!": "i"
@@ -50,7 +49,6 @@ def deobfuscate_leetspeak(text: str) -> str:
         normalized.append(LEET_MAP.get(char, char))
     reconstructed = "".join(normalized)
 
-    # Collapse repetitive spaced characters
     reconstructed = re.sub(r"(?<=\b\w)\s(?=\w\b)", "", reconstructed)
     return reconstructed
 
@@ -61,10 +59,8 @@ def run_robustness_benchmark() -> dict[str, list[dict[str, any]]]:
 
     adv_results = []
     for category, sample in ADVERSARIAL_SPAM_SAMPLES:
-        # 1. Raw prediction
         raw_prob, raw_label = predict_message(sample)
 
-        # 2. Prediction with leetspeak deobfuscation
         deobf_text = deobfuscate_leetspeak(sample)
         mitigated_prob, mitigated_label = predict_message(deobf_text)
 

@@ -17,7 +17,6 @@ import config
 from data import clean_text
 from predict import predict_message
 
-# 1. FreeCodeCamp Official Benchmark Verification
 
 FCC_TEST_CASES = [
     ("how are you doing today", "ham"),
@@ -42,7 +41,6 @@ def test_fcc_official_cases(message: str, expected_label: str):
 
 
 
-# 2. Return Type & Mathematical Range Validation
 
 def test_prediction_output_structure():
     """Ensures predict_message adheres strictly to [probability, label]."""
@@ -55,7 +53,6 @@ def test_prediction_output_structure():
 
 
 
-# 3. Edge Cases: Empty & Whitespace
 
 @pytest.mark.parametrize("empty_input", ["", "   ", "\n\t\r"])
 def test_empty_and_whitespace_inputs(empty_input: str):
@@ -67,18 +64,16 @@ def test_empty_and_whitespace_inputs(empty_input: str):
 
 
 
-# 4. Stress Testing: Extremely Long Message
 
 def test_very_long_message():
     """Models must handle messages exceeding max_length without dimension or shape mismatch errors."""
-    long_msg = "hello friend how are you " * 500  # 2500 words
+    long_msg = "hello friend how are you " * 500
     result = predict_message(long_msg)
     assert len(result) == 2
     assert 0.0 <= result[0] <= 1.0
 
 
 
-# 5. Out-of-Domain & Multilingual Inputs
 
 @pytest.mark.parametrize("foreign_text", [
     "Hola amigo, ¿quieres ir a almorzar mañana?",
@@ -94,7 +89,6 @@ def test_multilingual_inputs(foreign_text: str):
 
 
 
-# 6. Preprocessing Normalization Tests
 
 def test_clean_text_normalizations():
     """Verifies that regex normalization reliably extracts spam-indicative entity tokens."""

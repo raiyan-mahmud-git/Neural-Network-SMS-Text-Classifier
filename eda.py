@@ -25,7 +25,6 @@ def generate_eda_artifacts():
     train_df, valid_df = data.load_raw_data()
     df = pd.concat([train_df, valid_df], ignore_index=True)
 
-    # 1. Class Balance Analysis
     counts = df["label"].value_counts()
     percentages = df["label"].value_counts(normalize=True) * 100
 
@@ -47,7 +46,6 @@ def generate_eda_artifacts():
     plt.close()
     logger.info(f"Saved class balance plot to {class_plot_path}")
 
-    # 2. Message Length Distribution (Characters and Words)
     df["char_len"] = df["message"].apply(len)
     df["word_cnt"] = df["message"].apply(lambda s: len(str(s).split()))
 
@@ -75,10 +73,8 @@ def generate_eda_artifacts():
     plt.close()
     logger.info(f"Saved length distribution plot to {length_plot_path}")
 
-    # 3. Top Keywords Analysis
     df["cleaned"] = df["message"].apply(data.clean_text)
 
-    # Filter generic stopwords
     stopwords = {"to", "you", "a", "i", "the", "and", "is", "in", "for", "of", "my", "it", "on", "me", "your", "that", "have", "at", "are", "do", "from", "with", "be"}
     spam_tokens = [w for w in " ".join(df[df["label"] == "spam"]["cleaned"]).split() if w not in stopwords and len(w) > 1]
     ham_tokens = [w for w in " ".join(df[df["label"] == "ham"]["cleaned"]).split() if w not in stopwords and len(w) > 1]

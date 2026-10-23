@@ -36,7 +36,6 @@ def run_imbalance_experiment(epochs: int = 10) -> pd.DataFrame:
         logger.info(f"Running Imbalance Strategy: {strat}")
         config.set_seed(config.SEED)
 
-        # Consistent architecture
         model = models.build_cnn_model(vectorizer)
 
         cw = None
@@ -65,7 +64,6 @@ def run_imbalance_experiment(epochs: int = 10) -> pd.DataFrame:
             verbose=0
         )
 
-        # Evaluate on Test set
         test_probs = model.predict(X_test, verbose=0).ravel()
         metrics = compute_all_metrics(y_test, test_probs, threshold=0.5)
 

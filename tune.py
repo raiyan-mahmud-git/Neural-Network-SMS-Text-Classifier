@@ -45,7 +45,6 @@ def run_hyperparameter_sweep(
         "lr": [1e-3, 2e-3]
     }
 
-    # Generate parameter combinations
     keys, values = zip(*param_grid.items())
     all_combos = [dict(zip(keys, v)) for v in itertools.product(*values)]
     np.random.seed(seed)
@@ -61,14 +60,12 @@ def run_hyperparameter_sweep(
     for idx, params in enumerate(selected_combos, 1):
         logger.info(f"--- Trial {idx}/{len(selected_combos)}: {params} ---")
 
-        # Create vectorizer
         vectorizer = models.create_text_vectorizer(
             train_texts=X_train,
             vocab_size=params["vocab_size"],
             max_length=config.MAX_SEQUENCE_LENGTH
         )
 
-        # parameterized BiLSTM
         model = models.build_bilstm_model(
             vectorizer=vectorizer,
             embedding_dim=params["embed_dim"],

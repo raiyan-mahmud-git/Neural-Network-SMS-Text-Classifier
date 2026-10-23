@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-# Streamlit Page Config
 st.set_page_config(
     page_title="SMS Spam Detector | Deep Learning Demo",
     page_icon="🛡️",
@@ -22,14 +21,12 @@ import data
 from evaluate import explain_prediction_occlusion
 from predict import get_inference_model, predict_message
 
-# Title & Mentor Framing
 st.title("🛡️ Production SMS Spam Classifier")
 st.markdown("""
 *An end-to-end NLP & Deep Learning system upgrading the FreeCodeCamp SMS challenge into a portfolio-grade application.*
 Features **Keras 3 TextVectorization**, **BiLSTM/Transformer** architectures, **token normalization**, and **word-level occlusion explainability**.
 """)
 
-# Sample messages
 SAMPLE_MESSAGES = {
     "FCC Spam 1 (Cash Prize)": "you have won £1000 cash! call to claim your prize.",
     "FCC Spam 2 (Urgent Call)": "sale today! to stop texts call 98912460324",
@@ -42,7 +39,6 @@ SAMPLE_MESSAGES = {
 }
 
 
-# Sidebar Settings & Model Details
 
 with st.sidebar:
     st.header("⚙️ Configuration")
@@ -69,7 +65,6 @@ with st.sidebar:
     selected_sample = st.selectbox("Load a sample message:", ["-- Choose a Preset --"] + list(SAMPLE_MESSAGES.keys()))
 
 
-# Main Input Area
 
 default_text = ""
 if selected_sample != "-- Choose a Preset --":
@@ -90,7 +85,6 @@ if classify_button or (user_input and selected_sample != "-- Choose a Preset --"
     if not user_input.strip():
         st.warning("Please enter a valid message.")
     else:
-        # Run prediction
         prob, label = predict_message(user_input, threshold=threshold)
         cleaned_version = data.clean_text(user_input)
 
@@ -116,13 +110,11 @@ if classify_button or (user_input and selected_sample != "-- Choose a Preset --"
             st.write(f"**Operating Decision Threshold**: `{threshold:.2f}`")
             st.progress(float(prob))
 
-        # Show Preprocessed Tokens
         with st.expander("🛠️ View In-Graph Token Normalization"):
             st.markdown(f"**Raw Input**: `{user_input}`")
             st.markdown(f"**Normalized Input**: `{cleaned_version}`")
             st.caption("Notice how raw phone numbers, URLs, and currencies are normalized into high-information semantic tokens.")
 
-        # Explainability Section
         st.markdown("---")
         st.subheader("🧠 Model Explainability: Word Attribution Analysis")
         st.markdown(
@@ -153,7 +145,6 @@ if classify_button or (user_input and selected_sample != "-- Choose a Preset --"
             st.info("Input too short for word occlusion.")
 
 
-# Tabbed Performance & Architecture Overview
 
 st.markdown("---")
 tab1, tab2, tab3 = st.tabs(["📈 Model Comparison", "🏗️ Architecture Diagram", "❓ Engineering FAQ"])

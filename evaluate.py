@@ -83,7 +83,6 @@ def tune_decision_threshold(
         tn, fp, fn, _tp = cm.ravel()
 
        
-        # score = F1 - (fp_cost_weight * (fp / len(y_val)))
         cost_penalized_score = f1 - (fp_cost_weight * (fp / max(1, (tn + fp))))
 
         records.append({
@@ -130,7 +129,6 @@ def plot_learning_curves(history: keras.callbacks.History, model_name: str, save
     epochs_range = range(1, len(history.history["loss"]) + 1)
     _fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-    # Loss subplot
     axes[0].plot(epochs_range, history.history["loss"], "b-o", label="Training Loss")
     axes[0].plot(epochs_range, history.history["val_loss"], "r--s", label="Validation Loss")
     axes[0].set_title(f"{model_name}: Binary Crossentropy Loss", fontsize=12, fontweight="bold")
@@ -139,7 +137,6 @@ def plot_learning_curves(history: keras.callbacks.History, model_name: str, save
     axes[0].legend()
     axes[0].grid(True, linestyle="--", alpha=0.6)
 
-    # PR-AUC / ROC-AUC subplot
     metric_key = "pr_auc" if "pr_auc" in history.history else "roc_auc"
     val_metric_key = f"val_{metric_key}"
     if metric_key in history.history and val_metric_key in history.history:
@@ -197,11 +194,9 @@ def perform_error_analysis(
     fp_mask = (y_true == 0) & (preds == 1)
     fn_indices = np.where((y_true == 1) & (preds == 0))[0]
 
-    # Top false positives
     fp_indices = np.where(fp_mask)[0]
     fp_sorted = fp_indices[np.argsort(-y_prob[fp_indices])][:top_n]
 
-    # Top false negatives
     fn_sorted = fn_indices[np.argsort(y_prob[fn_indices])][:top_n]
 
     false_positives = [
@@ -231,14 +226,12 @@ def explain_prediction_occlusion(text: str, predict_fn, top_k: int = 5) -> list[
     attributions = []
 
     for i, word in enumerate(words):
-        # Create text with word i omitted
         occluded_words = words[:i] + words[i+1:]
         occluded_text = " ".join(occluded_words) if occluded_words else ""
         new_prob = float(predict_fn([occluded_text])[0])
         importance = base_prob - new_prob
         attributions.append((word, importance))
 
-    # Sort by absolute impact
     attributions.sort(key=lambda x: abs(x[1]), reverse=True)
     return attributions[:top_k]
 

@@ -38,21 +38,17 @@ logger = logging.getLogger(__name__)
 def run_full_benchmark():
     config.set_seed(config.SEED)
 
-    # 1. Load leak-free 3-way stratified splits
     X_train, y_train, X_val, y_val, X_test, y_test = data.get_stratified_3way_splits(seed=config.SEED)
 
-    # 2. In-graph TextVectorization layer adapted on X_train only
     logger.info("Fitting TextVectorization layer on training set...")
     vectorizer = models.create_text_vectorizer(X_train)
 
-    # Class weights for training neural nets
     class_weights = data.get_class_weights(y_train)
 
     metrics_registry = {}
     test_predictions_dict = {}
 
     
-    # 1. Classical Baseline: TF-IDF + Naive Bayes
     
     logger.info("=== 1/5 Training Classical Baseline (TF-IDF + Naive Bayes) ===")
     baseline_pipe = models.build_baseline_tfidf(model_type="nb")
@@ -69,7 +65,6 @@ def run_full_benchmark():
     test_predictions_dict["Baseline (NB)"] = (y_test, test_probs_base)
 
    
-    # 2. Rebuilt Original FCC Model
     
     logger.info("=== 2/5 Training Rebuilt Original FCC Model ===")
     config.set_seed(config.SEED)
@@ -94,7 +89,6 @@ def run_full_benchmark():
     test_predictions_dict["Original (AvgPool)"] = (y_test, test_probs_orig)
 
    
-    # 3. 1D CNN Model
    
     logger.info("=== 3/5 Training 1D CNN ===")
     config.set_seed(config.SEED)
@@ -119,7 +113,6 @@ def run_full_benchmark():
     test_predictions_dict["1D CNN"] = (y_test, test_probs_cnn)
 
    
-    # 4. Bidirectional LSTM
     
     logger.info("=== 4/5 Training Bidirectional LSTM ===")
     config.set_seed(config.SEED)
@@ -144,7 +137,6 @@ def run_full_benchmark():
     test_predictions_dict["BiLSTM"] = (y_test, test_probs_bilstm)
 
     
-    # 5. Transformer-Lite
     
     logger.info("=== 5/5 Training Transformer-Lite ===")
     config.set_seed(config.SEED)
@@ -169,7 +161,6 @@ def run_full_benchmark():
     test_predictions_dict["Transformer-Lite"] = (y_test, test_probs_trans)
 
     
-    # Threshold Tuning on Best Model (Validation Set Sweep)
     
     logger.info("=== Decision Threshold Sweep & Cost Optimization (Validation Set) ===")
     best_threshold, df_threshold_sweep = evaluate.tune_decision_threshold(
@@ -177,19 +168,16 @@ def run_full_benchmark():
     )
     evaluate.plot_threshold_curves(df_threshold_sweep, config.PLOTS_DIR / "threshold_tuning.png")
 
-    # Evaluate BiLSTM
     metrics_registry["Bidirectional LSTM (Tuned Threshold)"] = evaluate.compute_all_metrics(
         y_test, test_probs_bilstm, threshold=best_threshold
     )
 
    
-    # Reliability / Calibration Diagram
     
     logger.info("Generating Probability Calibration Diagram...")
     evaluate.plot_calibration_curves(test_predictions_dict, config.PLOTS_DIR / "calibration_curves.png")
 
     
-    # Error Analysis: Top 10 False Positives & False Negatives
     
     logger.info("Performing In-Depth Error Analysis on Test Set...")
     error_report = evaluate.perform_error_analysis(
@@ -203,10 +191,8 @@ def run_full_benchmark():
         json.dump(error_report, f, indent=2)
 
     
-    # Stratified 5-Fold Cross-Validation for Best Classical and Best Neural
     
     logger.info("Running Stratified 5-Fold Cross-Validation for Classical vs BiLSTM...")
-    # Combine train + val for CV
     X_cv = np.concatenate([X_train, X_val])
     y_cv = np.concatenate([y_train, y_val])
 
@@ -221,18 +207,15 @@ def run_full_benchmark():
         json.dump(cv_results, f, indent=2)
 
     
-    # Save Best Model to best_model.keras
     
     model_bilstm.save(config.BEST_MODEL_PATH)
     logger.info(f"Designated Bidirectional LSTM as production best_model.keras at {config.BEST_MODEL_PATH}")
 
     
-    # Save Metrics JSON & Output Comparison Markdown Table
     
     with open(config.METRICS_FILE, "w") as f:
         json.dump(metrics_registry, f, indent=2)
 
-    # Build markdown summary table
     summary_rows = []
     for model_name, m in metrics_registry.items():
         summary_rows.append({

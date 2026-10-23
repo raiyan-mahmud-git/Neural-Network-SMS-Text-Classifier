@@ -30,7 +30,6 @@ def plot_learning_curves(history: keras.callbacks.History, model_name: str, save
 
     _fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-    # Loss subplot
     axes[0].plot(epochs_range, history.history["loss"], "b-o", label="Training Loss")
     axes[0].plot(epochs_range, history.history["val_loss"], "r--s", label="Validation Loss")
     axes[0].set_title(f"{model_name}: Binary Crossentropy Loss", fontsize=12, fontweight="bold")
@@ -39,7 +38,6 @@ def plot_learning_curves(history: keras.callbacks.History, model_name: str, save
     axes[0].legend()
     axes[0].grid(True, linestyle="--", alpha=0.6)
 
-    # PR-AUC / ROC-AUC subplot
     metric_key = "pr_auc" if "pr_auc" in history.history else "roc_auc"
     val_metric_key = f"val_{metric_key}"
     if metric_key in history.history and val_metric_key in history.history:
@@ -104,7 +102,6 @@ def train_single_neural_model(
         )
     ]
 
-    # class imbalance
     class_weights = None
     if imbalance_strategy == "class_weight":
         class_weights = data.get_class_weights(y_train)
@@ -127,7 +124,6 @@ def train_single_neural_model(
     plot_path = config.PLOTS_DIR / f"{model_name}_learning_curve.png"
     plot_learning_curves(history, model_name, plot_path)
 
-    # Save final model
     model.save(checkpoint_path)
     logger.info(f"Model saved to {checkpoint_path}")
 
@@ -193,10 +189,8 @@ def main() -> None:
 
     config.set_seed(args.seed)
 
-    # leak-free
     X_train, y_train, X_val, y_val, _X_test, _y_test = data.get_stratified_3way_splits(seed=args.seed)
 
-    # Create & adapt TextVectorization layer
     logger.info("Adapting TextVectorization on training corpus...")
     vectorizer = models.create_text_vectorizer(X_train)
 

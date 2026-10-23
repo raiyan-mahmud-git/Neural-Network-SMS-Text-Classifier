@@ -22,7 +22,6 @@ import data
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-# Global cache
 _CACHED_MODEL = None
 _CACHED_THRESHOLD = config.DEFAULT_THRESHOLD
 
@@ -77,10 +76,8 @@ def predict_message(pred_text: str, threshold: float = config.DEFAULT_THRESHOLD)
     """
     model = get_inference_model()
 
-    # Apply token normalization
     cleaned = data.clean_text(pred_text)
 
-    # Input tensor of shape (1,)
     input_tensor = np.array([cleaned], dtype=object)
 
     raw_prob = float(model.predict(input_tensor, verbose=0)[0][0])

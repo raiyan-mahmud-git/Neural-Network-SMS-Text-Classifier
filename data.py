@@ -62,19 +62,14 @@ def clean_text(text: str) -> str:
     if not isinstance(text, str):
         return ""
 
-    # Convert to lowercase
     text = text.lower()
 
-    # 1. Normalize URLs
     text = re.sub(r"https?://\S+|www\.\S+", f" {config.URL_TOKEN} ", text)
 
-    # 2. Normalize Currency & Monetary mentions
     text = re.sub(r"(?:[\$£€]\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*(?:pounds?|quid|pence|dollars?|cents?|euros?|cash|prize)\b)", f" {config.MONEY_TOKEN} ", text)
 
-    # 3. Normalize Phone numbers
     text = re.sub(r"(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{3,5}\)?[-.\s]?)?\d{3,5}[-.\s]?\d{3,5}\b", f" {config.PHONE_TOKEN} ", text)
 
-    # 4. Standardize whitespace
     text = re.sub(r"\s+", " ", text).strip()
 
     return text
@@ -88,7 +83,6 @@ def load_raw_data() -> tuple[pd.DataFrame, pd.DataFrame]:
     train_df = pd.read_csv(config.TRAIN_FILE, sep="\t", header=None, names=["label", "message"])
     valid_df = pd.read_csv(config.VALID_FILE, sep="\t", header=None, names=["label", "message"])
 
-    # Ensure labels are binary (1 for spam, 0 for ham)
     train_df["target"] = (train_df["label"] == "spam").astype(int)
     valid_df["target"] = (valid_df["label"] == "spam").astype(int)
 
@@ -146,13 +140,11 @@ def get_stratified_3way_splits(
 
     y = np.array(combined_df["target"].tolist(), dtype=int)
 
-    # Step 1: Split into train and temp (val + test)
     val_test_ratio = val_size + test_size
     X_train, X_temp, y_train, y_temp = train_test_split(
         X, y, test_size=val_test_ratio, random_state=seed, stratify=y
     )
 
-    # Step 2: Split temp equally into validation and test sets
     relative_test_ratio = test_size / val_test_ratio
     X_val, X_test, y_val, y_test = train_test_split(
         X_temp, y_temp, test_size=relative_test_ratio, random_state=seed, stratify=y_temp
