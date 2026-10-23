@@ -8,3 +8,5 @@ requests==2.34.2
 fastapi==0.161.1
 pydantic==2.14.1
 uvicorn==0.54.0
+matplotlib==3.11.2
+streamlit==1.66.0
