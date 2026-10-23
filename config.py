@@ -9,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 
-
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 ARTIFACTS_DIR = BASE_DIR / "artifacts"

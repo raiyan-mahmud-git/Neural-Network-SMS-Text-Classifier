@@ -17,7 +17,6 @@ import config
 from data import clean_text
 from predict import predict_message
 
-
 FCC_TEST_CASES = [
     ("how are you doing today", "ham"),
     ("sale today! to stop texts call 98912460324", "spam"),
