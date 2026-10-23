@@ -2,10 +2,6 @@
 Production REST API for SMS Spam Classification.
 Built with FastAPI and Pydantic.
 
-WHY THIS MATTERS:
-In production microservice architectures, ML models are packaged behind RESTful
-or gRPC APIs with strict request/response data contracts, schema validation,
-and health check endpoints for Kubernetes/container orchestration.
 """
 
 
@@ -40,19 +36,19 @@ class SMSResponse(BaseModel):
 
 @app.on_event("startup")
 def startup_event():
-    """Pre-warm model into memory on server boot to avoid cold-start latency."""
+    """Pre-warm model into memory """
     get_inference_model()
 
 
 @app.get("/health", tags=["Monitoring"])
 def health_check() -> dict[str, str]:
-    """Liveness & readiness probe for container orchestrators."""
+    
     return {"status": "healthy", "service": "sms-spam-classifier"}
 
 
 @app.post("/predict", response_model=SMSResponse, tags=["Inference"])
 def predict_sms(request: SMSRequest) -> SMSResponse:
-    """Classifies an SMS message and returns probability, label, and metadata."""
+    """Classifies an SMS message and returns probability """
     try:
         prob, label = predict_message(request.message, threshold=request.threshold)
         return SMSResponse(

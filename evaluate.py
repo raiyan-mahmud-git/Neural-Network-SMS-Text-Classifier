@@ -195,7 +195,7 @@ def perform_error_analysis(
     preds = (y_prob >= threshold).astype(int)
 
     fp_mask = (y_true == 0) & (preds == 1)
-    fn_mask = (y_true == 1) & (preds == 0)
+    fn_indices = np.where((y_true == 1) & (preds == 0))[0]
 
     # Top false positives
     fp_indices = np.where(fp_mask)[0]

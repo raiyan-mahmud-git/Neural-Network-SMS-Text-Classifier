@@ -2,10 +2,6 @@
 Interactive Web Demo for SMS Spam Detection & Model Explainability.
 Built with Streamlit.
 
-WHY THIS MATTERS:
-A machine learning project is incomplete if stakeholders cannot interact with it.
-A clean web interface with explainability features transforms a black-box model
-into an interpretable, verifiable product that users and reviewers can trust.
 """
 
 import json
@@ -33,7 +29,7 @@ st.markdown("""
 Features **Keras 3 TextVectorization**, **BiLSTM/Transformer** architectures, **token normalization**, and **word-level occlusion explainability**.
 """)
 
-# Sample messages for quick testing
+# Sample messages
 SAMPLE_MESSAGES = {
     "FCC Spam 1 (Cash Prize)": "you have won £1000 cash! call to claim your prize.",
     "FCC Spam 2 (Urgent Call)": "sale today! to stop texts call 98912460324",
@@ -45,9 +41,9 @@ SAMPLE_MESSAGES = {
     "Subtle Ham (Business)": "Your package has been delivered to your front porch. Thank you for shopping with us.",
 }
 
-# ---------------------------------------------------------------------------
+
 # Sidebar Settings & Model Details
-# ---------------------------------------------------------------------------
+
 with st.sidebar:
     st.header("⚙️ Configuration")
     threshold = st.slider(
@@ -72,9 +68,9 @@ with st.sidebar:
     st.header("🎯 Sample Messages")
     selected_sample = st.selectbox("Load a sample message:", ["-- Choose a Preset --"] + list(SAMPLE_MESSAGES.keys()))
 
-# ---------------------------------------------------------------------------
+
 # Main Input Area
-# ---------------------------------------------------------------------------
+
 default_text = ""
 if selected_sample != "-- Choose a Preset --":
     default_text = SAMPLE_MESSAGES[selected_sample]
@@ -156,9 +152,9 @@ if classify_button or (user_input and selected_sample != "-- Choose a Preset --"
         else:
             st.info("Input too short for word occlusion.")
 
-# ---------------------------------------------------------------------------
+
 # Tabbed Performance & Architecture Overview
-# ---------------------------------------------------------------------------
+
 st.markdown("---")
 tab1, tab2, tab3 = st.tabs(["📈 Model Comparison", "🏗️ Architecture Diagram", "❓ Engineering FAQ"])
 

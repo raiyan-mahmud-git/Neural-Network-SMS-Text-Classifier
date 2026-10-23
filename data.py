@@ -1,10 +1,6 @@
 """
 Data Pipeline: Download, Ingestion, Text Cleaning, Split Management & Imbalance Handling.
 
-WHY THIS MATTERS:
-Garbage in, garbage out. High-performing NLP models depend heavily on clean,
-leak-free data, robust domain-specific token normalization (URLs, phones, money),
-and disciplined split hygiene (train / validation / test) to prevent over-optimistic evaluations.
 """
 
 import logging
@@ -25,11 +21,6 @@ def download_dataset(url: str, destination_path) -> None:
     """
     Downloads raw dataset files using standard cross-platform HTTP requests.
 
-    WHY THIS MATTERS:
-    The original script used `os.system("wget ...")`, which fails on native Windows
-    and in minimal Docker containers. Additionally, freeCodeCamp's CDN blocks the default
-    Python-urllib User-Agent with a 403 Forbidden. Adding a standard User-Agent header
-    ensures clean, cross-platform downloads anywhere.
     """
     if not destination_path.exists():
         logger.info(f"Downloading from {url} to {destination_path}...")
@@ -67,11 +58,6 @@ def clean_text(text: str) -> str:
     - Normalizes Currency/Prizes -> <MONEY>
     - Cleans excessive whitespace
 
-    WHY THIS MATTERS:
-    In spam classification, specific phone numbers, prize amounts, and spam URLs
-    differ in every single message. If kept raw, they explode vocabulary size and
-    become Out-Of-Vocabulary (OOV) tokens during inference. Converting them to special
-    tokens retains high-value spam intent without vocabulary fragmentation.
     """
     if not isinstance(text, str):
         return ""
@@ -79,13 +65,13 @@ def clean_text(text: str) -> str:
     # Convert to lowercase
     text = text.lower()
 
-    # 1. Normalize URLs (http, https, www, domain-like patterns)
+    # 1. Normalize URLs
     text = re.sub(r"https?://\S+|www\.\S+", f" {config.URL_TOKEN} ", text)
 
-    # 2. Normalize Currency & Monetary mentions (e.g. £1000, $500, 1000 quid, 50p, 50000 cash)
+    # 2. Normalize Currency & Monetary mentions
     text = re.sub(r"(?:[\$£€]\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*(?:pounds?|quid|pence|dollars?|cents?|euros?|cash|prize)\b)", f" {config.MONEY_TOKEN} ", text)
 
-    # 3. Normalize Phone numbers (7 to 15 digit sequences, with optional +, brackets, dashes, spaces)
+    # 3. Normalize Phone numbers
     text = re.sub(r"(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{3,5}\)?[-.\s]?)?\d{3,5}[-.\s]?\d{3,5}\b", f" {config.PHONE_TOKEN} ", text)
 
     # 4. Standardize whitespace
@@ -97,7 +83,6 @@ def clean_text(text: str) -> str:
 def load_raw_data() -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Loads raw freeCodeCamp train and validation dataframes.
-    TSV format has two columns: [label, message]
     """
     ensure_datasets_present()
     train_df = pd.read_csv(config.TRAIN_FILE, sep="\t", header=None, names=["label", "message"])
@@ -114,10 +99,6 @@ def inspect_leakage_and_duplicates(train_df: pd.DataFrame, valid_df: pd.DataFram
     """
     Analyzes duplicate messages within and across dataset splits.
 
-    WHY THIS MATTERS:
-    In benchmark datasets (like the SMS Spam Collection used by FCC), exact duplicate
-    messages frequently exist. If an identical message appears in both train and validation/test,
-    the model merely memorizes it, creating test set leakage and artificially inflated scores.
     """
     train_dupes = int(train_df.duplicated(subset=["message"]).sum())
     valid_dupes = int(valid_df.duplicated(subset=["message"]).sum())
@@ -152,10 +133,6 @@ def get_stratified_3way_splits(
     Combines all available data, drops exact duplicates, and generates a leak-free,
     stratified 3-way split: (X_train, y_train), (X_val, y_val), (X_test, y_test).
 
-    WHY THIS MATTERS:
-    A 2-way split tempts researchers to tune hyperparameters or decision thresholds
-    on the test set. A true 3-way split keeps the test set untouched in a 'vault'
-    until the final model is frozen.
     """
     train_df, valid_df = load_raw_data()
     combined_df = pd.concat([train_df, valid_df], ignore_index=True)
@@ -210,10 +187,6 @@ def get_class_weights(y: np.ndarray) -> dict[int, float]:
     """
     Calculates balanced class weights: n_samples / (n_classes * np.bincount(y)).
 
-    WHY THIS MATTERS:
-    When ~87% of messages are Ham, a standard loss gradient treats errors on Ham
-    with 7x greater aggregate urgency than errors on Spam. Class weights rescale the loss
-    per sample, forcing the optimizer to penalize false negatives (missed spam) proportionately.
     """
     weights = compute_class_weight(class_weight="balanced", classes=np.unique(y), y=y)
     return {cls: float(weight) for cls, weight in zip(np.unique(y), weights)}
@@ -223,9 +196,6 @@ def oversample_minority_class(X: np.ndarray, y: np.ndarray, seed: int = config.S
     """
     Performs random oversampling on the minority class (spam) to balance the training distribution.
 
-    WHY THIS MATTERS:
-    Allows comparing algorithmic reweighting (`class_weight`) against data-level
-    resampling (oversampling). Each mini-batch will feature a 50/50 mix of spam and ham.
     """
     np.random.seed(seed)
     spam_indices = np.where(y == 1)[0]
